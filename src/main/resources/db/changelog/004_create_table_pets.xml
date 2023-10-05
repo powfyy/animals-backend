@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+    <changeSet id="004_create_table_pets" author="d.srb@yandex.ru">
+        <createTable tableName="pets">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gender" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_animal" type="VARCHAR(5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="birth_day" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="breed" type="VARCHAR(255)"/>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_pets_organization_id"
+                             references="organizations(id)"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_pets_user_id" references="users(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="addForeignKeyOrganizationToPets" author="d.srb@yandex.ru">
+        <addForeignKeyConstraint baseTableName="pets" baseColumnNames="organization_id"
+                                 referencedTableName="organizations" referencedColumnNames="id"
+                                 constraintName="fk_pets_organization_id" />
+    </changeSet>
+
+    <changeSet id="addForeignKeyUserToPets" author="d.srb@yandex.ru">
+        <addForeignKeyConstraint baseTableName="pets" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+                                 constraintName="fk_pets_user_id" />
+    </changeSet>
+</databaseChangeLog>
