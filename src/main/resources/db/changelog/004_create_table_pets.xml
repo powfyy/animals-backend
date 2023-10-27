@@ -14,13 +14,16 @@
             <column name="gender" type="CHAR(1)">
                 <constraints nullable="false"/>
             </column>
-            <column name="type_animal" type="VARCHAR(5)">
+            <column name="type_pet" type="VARCHAR(3)">
                 <constraints nullable="false"/>
             </column>
-            <column name="birth_day" type="VARCHAR(10)">
+            <column name="birth_day" type="DATE">
                 <constraints nullable="false"/>
             </column>
             <column name="breed" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
             <column name="organization_id" type="BIGINT">
                 <constraints nullable="true" foreignKeyName="fk_pets_organization_id"
                              references="organizations(id)"/>
@@ -29,17 +32,5 @@
                 <constraints nullable="true" foreignKeyName="fk_pets_user_id" references="users(id)"/>
             </column>
         </createTable>
-    </changeSet>
-
-    <changeSet id="addForeignKeyOrganizationToPets" author="d.srb@yandex.ru">
-        <addForeignKeyConstraint baseTableName="pets" baseColumnNames="organization_id"
-                                 referencedTableName="organizations" referencedColumnNames="id"
-                                 constraintName="fk_pets_organization_id" />
-    </changeSet>
-
-    <changeSet id="addForeignKeyUserToPets" author="d.srb@yandex.ru">
-        <addForeignKeyConstraint baseTableName="pets" baseColumnNames="user_id"
-                                 referencedTableName="users" referencedColumnNames="id"
-                                 constraintName="fk_pets_user_id" />
     </changeSet>
 </databaseChangeLog>

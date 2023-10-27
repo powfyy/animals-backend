@@ -6,5 +6,7 @@
     <include file="changelog/001_create_table_auth.xml" relativeToChangelogFile="true"/>
     <include file="changelog/002_create_table_users.xml" relativeToChangelogFile="true"/>
     <include file="changelog/003_create_table_organizations.xml" relativeToChangelogFile="true"/>
-
+    <include file="changelog/004_create_table_pets.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/005_create_table_pet_photos.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/006_create_table_user_pet.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
