@@ -9,18 +9,21 @@ import dev.pethaven.mappers.OrganizationMapper;
 import dev.pethaven.mappers.PetMapper;
 import dev.pethaven.mappers.UserMapper;
 import dev.pethaven.pojo.MessageResponse;
-import dev.pethaven.repositories.AuthRepository;
-import dev.pethaven.repositories.OrganizationRepository;
-import dev.pethaven.repositories.PetRepository;
-import dev.pethaven.repositories.UserRepository;
+import dev.pethaven.pojo.SavePet;
+import dev.pethaven.repositories.*;
+import dev.pethaven.services.MinioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,11 +38,16 @@ public class ProfileeController {
     @Autowired
     PetRepository petRepository;
     @Autowired
+    PetPhotosRepository petPhotosRepository;
+    @Autowired
     PetMapper petMapper;
     @Autowired
     UserMapper userMapper;
     @Autowired
     OrganizationMapper organizationMapper;
+
+    @Autowired
+    MinioService minioService;
 
     @GetMapping("/user")
     public UserDTO getUserInfo(Principal user) {
@@ -77,19 +85,72 @@ public class ProfileeController {
     }
 
     @PostMapping("/organization/pets")
-    public PetDTO addPet(Principal user, @RequestBody PetDTO newPetDTO){
+    @Transactional
+    public ResponseEntity<?> addPet(Principal user, @ModelAttribute SavePet newPetInfo) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        Pet tempPet = petMapper.toEntity(newPetDTO);
+        Pet tempPet = petMapper.toEntity(newPetInfo);
         Pet newPet = new Pet(null, tempPet.getName(), tempPet.getGender(), tempPet.getTypePet(),
-                tempPet.getBirthDay(), tempPet.getBreed(), PetStatus.ACTIVE,
+                tempPet.getBirthDay(), tempPet.getBreed(), tempPet.getDescription(), PetStatus.ACTIVE,
                 organizationRepository.findByAuthId(authRepository.findByUsername(user.getName()).get().getId()));
         petRepository.save(newPet);
-        return petMapper.toDTO(newPet);
+        String bucketName = newPet.getId().toString() + "-" + newPet.getTypePet().toString().toLowerCase();
+        try {
+            minioService.createBucket(bucketName);
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        if (!newPetInfo.getFiles().isEmpty()) {
+            minioService.uploadFile(newPetInfo.getFiles(), bucketName);
+            newPetInfo.getFiles().forEach(file -> {
+                PetPhotos petPhotos = new PetPhotos(null, file.getOriginalFilename(), newPet);
+                petPhotosRepository.save(petPhotos);
+            });
+        }
+        return ResponseEntity.ok().body(new MessageResponse("Pet created"));
+    }
+
+    @PutMapping ("/organization/pets/{id}")
+    @Transactional
+    public ResponseEntity <?> updatePet (@PathVariable("id") Long petId, @ModelAttribute SavePet updatedPet){
+        String bucketName = petId.toString() + "-" + updatedPet.getTypePet().toLowerCase();
+        Pet oldPet = petRepository.findById(petId).get();
+        if (!updatedPet.getDeletedPhotoRefs().isEmpty()){
+            minioService.removeFiles(updatedPet.getDeletedPhotoRefs(),bucketName);
+            updatedPet.getDeletedPhotoRefs().forEach(deletedRef -> {
+                petPhotosRepository.deleteByPhotoRef(deletedRef);
+            });
+        }
+        if(!updatedPet.getFiles().isEmpty()){
+            minioService.uploadFile(updatedPet.getFiles(), bucketName);
+            updatedPet.getFiles().forEach(file -> {
+                PetPhotos petPhotos = new PetPhotos(null, file.getOriginalFilename(), oldPet);
+                petPhotosRepository.save(petPhotos);
+            });
+        }
+        petMapper.updatePet(updatedPet, oldPet);
+        petRepository.save(oldPet);
+        return ResponseEntity.ok().body(new MessageResponse("Pet updated"));
     }
     @DeleteMapping("/organization/pets/{id}")
+    @Transactional
     public ResponseEntity<?> deletePet(@PathVariable("id") Long id) {
+        Pet pet =petRepository.findById(id).get();
+        String bucketName = pet.getId() + "-" + pet.getTypePet().toString().toLowerCase();
+        if(!pet.getPetPhotos().isEmpty()){
+            try{
+                minioService.removeFiles(bucketName, pet.getPetPhotos());
+            }catch (Exception e) {
+                System.out.println("Error deleting files: " + e.getMessage());
+            }
+        }
+        try {
+            minioService.removeBucket(bucketName);
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException e){
+            System.out.println("Error deleting bucket: "+ e.getMessage());
+        }
         petRepository.deleteById(id);
-        return ResponseEntity.ok().body(new MessageResponse("Питомец удален."));
+        petPhotosRepository.deleteByPetId(id);
+        return ResponseEntity.ok().body(new MessageResponse("Pet deleted."));
     }
 
     @PatchMapping("/organization/pets/{id}/status")
@@ -98,16 +159,9 @@ public class ProfileeController {
         Pet updatedpet = petRepository.findById(petId).get();
         updatedpet.setStatus(PetStatus.valueOf(newStatus));
         petRepository.save(updatedpet);
-        return ResponseEntity.ok().body(new MessageResponse("Статус изменен."));
+        return ResponseEntity.ok().body(new MessageResponse("Status updated"));
     }
 
-    @PutMapping("/organization/pets/{id}")
-    public PetDTO updatePet(@PathVariable("id") Long petId, @RequestBody PetDTO newPet) {
-        Pet pet = petRepository.findById(petId).get();
-        petMapper.updatePet(newPet, pet);
-        petRepository.save(pet);
-        return petMapper.toDTO(pet);
-    }
 
     @PostMapping("/organization/pets/{id}/adopt")
     public ResponseEntity<?> adoptPet(@PathVariable("id") Long petId, @RequestBody String username) {

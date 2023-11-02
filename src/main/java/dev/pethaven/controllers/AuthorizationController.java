@@ -92,7 +92,7 @@ public class AuthorizationController {
                     .body(new MessageResponse("Error: Username cannot be empty"));
         }
         Auth newAuth = new Auth(null, signupOrganizationRequest.getUsername(), Role.ORG, passwordEncoder.encode(signupOrganizationRequest.getPassword()),true);
-        Organization newOrganization = new Organization(null, signupOrganizationRequest.getNameOrganization(), signupOrganizationRequest.getPassportNumber(), signupOrganizationRequest.getPassportSeries(), signupOrganizationRequest.getPhoneNumber(), newAuth);
+        Organization newOrganization = new Organization(null, signupOrganizationRequest.getNameOrganization(), signupOrganizationRequest.getCity(), signupOrganizationRequest.getPassportNumber(), signupOrganizationRequest.getPassportSeries(), signupOrganizationRequest.getPhoneNumber(), newAuth);
         authRepository.save(newAuth);
         organizationRepository.save(newOrganization);
         return ResponseEntity.ok(new MessageResponse("Organization CREATED"));

@@ -9,4 +9,5 @@ public class OrganizationDTO {
     String passportNumber;
     String phoneNumber;
     String username;
+    String city;
 }

@@ -9,4 +9,8 @@
     <include file="changelog/004_create_table_pets.xml" relativeToChangelogFile="true"/>
     <include file="changelog/005_create_table_pet_photos.xml" relativeToChangelogFile="true"/>
     <include file="changelog/006_create_table_user_pet.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/007_add_description_to_pets.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/008_add_city_to_organizations.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/009_update_city_not_null.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/010_add_not_null_constraint.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

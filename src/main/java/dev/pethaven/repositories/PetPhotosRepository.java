@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PetPhotosRepository extends JpaRepository <PetPhotos, Long> {
+    public void deleteByPetId(Long petId);
+    public void deleteByPhotoRef(String photoRef);
 }

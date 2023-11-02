@@ -47,6 +47,8 @@ class ProfileeControllerTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
+    private PetMapper petMapper;
+    @Mock
     private Principal principal;
     private MockMvc mockMvc;
 
@@ -59,11 +61,11 @@ class ProfileeControllerTest {
     void testGetAllPets() throws Exception {
 
         MockitoAnnotations.openMocks(this);
-        Organization organization =new Organization(1L, "TeddyFood", "2020", "123456", "79203335544",
+        Organization organization =new Organization(1L, "TeddyFood","Воронеж" ,"2020", "123456", "79203335544",
                 new Auth(1L, "username", Role.ORG, passwordEncoder.encode("ffff"), true));
         Pet pet = new Pet(1L, "Буся", PetGender.F, PetType.DOG, LocalDate.of(2019, 3, 12),
-                "Метис помчи", PetStatus.ACTIVE, organization);
-        PetDTO petDTO = PetMapper.INSTANCE.toDTO(pet);
+                "помчи","", PetStatus.ACTIVE, organization);
+        PetDTO petDTO = petMapper.toDTO(pet);
         List<Pet> petList = new ArrayList<>();
         petList.add(pet);
         when(principal.getName()).thenReturn("username");

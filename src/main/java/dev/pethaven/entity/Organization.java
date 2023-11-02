@@ -15,6 +15,8 @@ public class Organization {
     private Long id;
     @Column(nullable = false)
     private String nameOrganization;
+    @Column (nullable = false)
+    private String city;
     @Column(nullable = false)
     private String passportSeries;
     @Column(nullable = false)
@@ -29,7 +31,7 @@ public class Organization {
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
     private List<Pet> pets;
 
-    public Organization(Long id, String nameOrganization, String passportSeries, String passportNumber, String phoneNumber, Auth auth) {
+    public Organization(Long id, String nameOrganization,String city, String passportSeries, String passportNumber, String phoneNumber, Auth auth) {
         this.id = id;
         this.nameOrganization = nameOrganization;
         this.passportSeries = passportSeries;

@@ -25,7 +25,10 @@ public class Pet {
     private PetType typePet;
     @Column (nullable = false)
     private LocalDate birthDay;
+    @Column
     private String breed;
+    @Column
+    private String description;
     @Column (nullable = false)
     @Enumerated (EnumType.STRING)
     PetStatus status;
@@ -41,7 +44,7 @@ public class Pet {
 
 
     public Pet(Long id, String name, PetGender gender, PetType typePet, LocalDate birthDay,
-               String breed, PetStatus status, Organization organization) {
+               String breed, String description, PetStatus status, Organization organization) {
         this.id = id;
         this.name = name;
         this.gender = gender;
@@ -51,12 +54,13 @@ public class Pet {
             this.breed = breed.toLowerCase();
         }
         else {this.breed = null;};
+        this.description= description;
         this.status= status;
         this.organization = organization;
     }
 
     public Pet(Long id, String name, PetGender gender, PetType typePet, LocalDate birthDay,
-               String breed, PetStatus status, User user) {
+               String breed, String description, PetStatus status, User user) {
         this.id = id;
         this.name = name;
         this.gender = gender;
@@ -66,6 +70,7 @@ public class Pet {
             this.breed = breed.toLowerCase();
         }
         else {this.breed = null;};
+        this.description = description;
         this.status= status;
         this.user = user;
     }

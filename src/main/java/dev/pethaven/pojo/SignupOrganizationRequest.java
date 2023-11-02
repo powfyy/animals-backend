@@ -8,6 +8,7 @@ public class SignupOrganizationRequest {
     private String username;
     private String password;
     private String nameOrganization;
+    private String city;
     private String passportSeries;
     private String passportNumber;
     private String phoneNumber;
