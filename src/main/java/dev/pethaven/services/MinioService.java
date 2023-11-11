@@ -26,7 +26,7 @@ public class MinioService {
         this.minioClient = minioClient;
     }
 
-    public void createBucket(String bucketName) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+    public void createBucket(String bucketName) throws Exception {
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {

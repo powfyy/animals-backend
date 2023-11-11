@@ -82,7 +82,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/signup/**").permitAll()
                 .antMatchers("/api/profile/organization").hasAnyAuthority(Role.ORG.name())
                 .antMatchers("/api/profile/user").hasAnyAuthority(Role.USER.name(), Role.ADMIN.name())
-                .antMatchers("/api/home").permitAll()
+                .antMatchers("/api/home/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

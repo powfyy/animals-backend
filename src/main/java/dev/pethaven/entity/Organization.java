@@ -34,6 +34,7 @@ public class Organization {
     public Organization(Long id, String nameOrganization,String city, String passportSeries, String passportNumber, String phoneNumber, Auth auth) {
         this.id = id;
         this.nameOrganization = nameOrganization;
+        this.city=city;
         this.passportSeries = passportSeries;
         this.passportNumber = passportNumber;
         this.phoneNumber = phoneNumber;

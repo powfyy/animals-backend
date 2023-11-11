@@ -1,13 +1,14 @@
 package dev.pethaven.mappers;
 
 import dev.pethaven.dto.OrganizationDTO;
+import dev.pethaven.dto.OrganizationDtoCityName;
 import dev.pethaven.entity.Auth;
 import dev.pethaven.entity.Organization;
 import javax.annotation.Generated;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-11-02T12:52:32+0300",
+    date = "2023-11-10T14:03:32+0300",
     comments = "version: 1.4.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.1.1.jar, environment: Java 1.8.0_372 (Amazon.com Inc.)"
 )
 public class OrganizationMapperImpl implements OrganizationMapper {
@@ -28,6 +29,20 @@ public class OrganizationMapperImpl implements OrganizationMapper {
         organizationDTO.setCity( organization.getCity() );
 
         return organizationDTO;
+    }
+
+    @Override
+    public OrganizationDtoCityName toDtoCityName(Organization organization) {
+        if ( organization == null ) {
+            return null;
+        }
+
+        OrganizationDtoCityName organizationDtoCityName = new OrganizationDtoCityName();
+
+        organizationDtoCityName.setNameOrganization( organization.getNameOrganization() );
+        organizationDtoCityName.setCity( organization.getCity() );
+
+        return organizationDtoCityName;
     }
 
     @Override

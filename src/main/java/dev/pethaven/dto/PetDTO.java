@@ -18,7 +18,7 @@ public class PetDTO {
     private String breed;
     private String description;
     private String status;
-    private Long organizationId;
-    private Long userId;
     private List<String> photoRefs;
+    private String city;
+    private String nameOrganization;
 }

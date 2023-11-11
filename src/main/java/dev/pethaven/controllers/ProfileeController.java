@@ -12,6 +12,7 @@ import dev.pethaven.pojo.MessageResponse;
 import dev.pethaven.pojo.SavePet;
 import dev.pethaven.repositories.*;
 import dev.pethaven.services.MinioService;
+import dev.pethaven.services.PetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,8 @@ public class ProfileeController {
     UserMapper userMapper;
     @Autowired
     OrganizationMapper organizationMapper;
-
+    @Autowired
+    PetService petService;
     @Autowired
     MinioService minioService;
 
@@ -54,7 +56,18 @@ public class ProfileeController {
         Auth currentAuth = (authRepository.findByUsername(user.getName())).get();
         return userMapper.toDTO(userRepository.findByAuthId(currentAuth.getId()));
     }
-
+    @PutMapping("/user")
+    public ResponseEntity<?> updateUser(Principal principal, @RequestBody UserDTO updatedUser){
+        User user = userRepository.findByAuthId(authRepository.findByUsername(principal.getName()).get().getId());
+        userMapper.updateUser(updatedUser,user);
+        userRepository.save(user);
+        return ResponseEntity.ok().body(new MessageResponse("User updated"));
+    }
+    @DeleteMapping("/user")
+    public ResponseEntity<?> deleteUser(Principal user){
+        userRepository.deleteByAuthId(authRepository.findByUsername(user.getName()).get().getId());
+        return ResponseEntity.ok().body(new MessageResponse("User deleted"));
+    }
     @GetMapping("/organization")
     public OrganizationDTO getOrganization(Principal user) {
         Auth currentAuth = (authRepository.findByUsername(user.getName())).get();
@@ -71,8 +84,7 @@ public class ProfileeController {
 
     @DeleteMapping("/organization")
     public void deleteOrganization(Principal user) {
-        Auth currentAuth = (authRepository.findByUsername(user.getName())).get();
-        organizationRepository.deleteById(organizationRepository.findByAuthId(currentAuth.getId()).getId());
+        organizationRepository.deleteByAuthId(authRepository.findByUsername(user.getName()).get().getId());
     }
 
     @GetMapping("/organization/pets")
@@ -87,78 +99,27 @@ public class ProfileeController {
     @PostMapping("/organization/pets")
     @Transactional
     public ResponseEntity<?> addPet(Principal user, @ModelAttribute SavePet newPetInfo) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        Pet tempPet = petMapper.toEntity(newPetInfo);
-        Pet newPet = new Pet(null, tempPet.getName(), tempPet.getGender(), tempPet.getTypePet(),
-                tempPet.getBirthDay(), tempPet.getBreed(), tempPet.getDescription(), PetStatus.ACTIVE,
-                organizationRepository.findByAuthId(authRepository.findByUsername(user.getName()).get().getId()));
-        petRepository.save(newPet);
-        String bucketName = newPet.getId().toString() + "-" + newPet.getTypePet().toString().toLowerCase();
-        try {
-            minioService.createBucket(bucketName);
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-            e.printStackTrace();
-        }
-        if (!newPetInfo.getFiles().isEmpty()) {
-            minioService.uploadFile(newPetInfo.getFiles(), bucketName);
-            newPetInfo.getFiles().forEach(file -> {
-                PetPhotos petPhotos = new PetPhotos(null, file.getOriginalFilename(), newPet);
-                petPhotosRepository.save(petPhotos);
-            });
-        }
+        petService.addPet(user, newPetInfo);
         return ResponseEntity.ok().body(new MessageResponse("Pet created"));
     }
 
     @PutMapping ("/organization/pets/{id}")
     @Transactional
     public ResponseEntity <?> updatePet (@PathVariable("id") Long petId, @ModelAttribute SavePet updatedPet){
-        String bucketName = petId.toString() + "-" + updatedPet.getTypePet().toLowerCase();
-        Pet oldPet = petRepository.findById(petId).get();
-        if (!updatedPet.getDeletedPhotoRefs().isEmpty()){
-            minioService.removeFiles(updatedPet.getDeletedPhotoRefs(),bucketName);
-            updatedPet.getDeletedPhotoRefs().forEach(deletedRef -> {
-                petPhotosRepository.deleteByPhotoRef(deletedRef);
-            });
-        }
-        if(!updatedPet.getFiles().isEmpty()){
-            minioService.uploadFile(updatedPet.getFiles(), bucketName);
-            updatedPet.getFiles().forEach(file -> {
-                PetPhotos petPhotos = new PetPhotos(null, file.getOriginalFilename(), oldPet);
-                petPhotosRepository.save(petPhotos);
-            });
-        }
-        petMapper.updatePet(updatedPet, oldPet);
-        petRepository.save(oldPet);
-        return ResponseEntity.ok().body(new MessageResponse("Pet updated"));
+       petService.updatePet(petId, updatedPet);
+       return ResponseEntity.ok().body(new MessageResponse("Pet updated"));
     }
     @DeleteMapping("/organization/pets/{id}")
     @Transactional
     public ResponseEntity<?> deletePet(@PathVariable("id") Long id) {
-        Pet pet =petRepository.findById(id).get();
-        String bucketName = pet.getId() + "-" + pet.getTypePet().toString().toLowerCase();
-        if(!pet.getPetPhotos().isEmpty()){
-            try{
-                minioService.removeFiles(bucketName, pet.getPetPhotos());
-            }catch (Exception e) {
-                System.out.println("Error deleting files: " + e.getMessage());
-            }
-        }
-        try {
-            minioService.removeBucket(bucketName);
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException e){
-            System.out.println("Error deleting bucket: "+ e.getMessage());
-        }
-        petRepository.deleteById(id);
-        petPhotosRepository.deleteByPetId(id);
+        petService.deletePet(id);
         return ResponseEntity.ok().body(new MessageResponse("Pet deleted."));
     }
 
     @PatchMapping("/organization/pets/{id}/status")
     public ResponseEntity<?> updateStatusPet(@PathVariable("id") Long petId,
                                              @RequestParam(value = "newStatus") String newStatus) {
-        Pet updatedpet = petRepository.findById(petId).get();
-        updatedpet.setStatus(PetStatus.valueOf(newStatus));
-        petRepository.save(updatedpet);
+       petService.updateStatusPet(petId,newStatus);
         return ResponseEntity.ok().body(new MessageResponse("Status updated"));
     }
 
@@ -167,17 +128,10 @@ public class ProfileeController {
     public ResponseEntity<?> adoptPet(@PathVariable("id") Long petId, @RequestBody String username) {
         Pet pet = petRepository.findById(petId).get();
         if (pet.getStatus() == PetStatus.FREEZE) {
-            Auth currentAuth = (authRepository.findByUsername(username)).get();
-            User user = userRepository.findByAuthId(currentAuth.getId());
-            user.getPetSet().remove(pet);
-            pet.setUser(user);
-            pet.getUserSet().clear();
-            pet.setStatus(PetStatus.ADOPTED);
-            userRepository.save(user);
-            petRepository.save(pet);
-            return ResponseEntity.ok(new MessageResponse("Питомец усыновлен"));
+            petService.adoptPet(username, pet);
+            return ResponseEntity.ok(new MessageResponse("Pet adopted"));
         }
-        return ResponseEntity.badRequest().body(new MessageResponse("Неверный статус питомца. Требуется 'FREEZE'."));
+        return ResponseEntity.badRequest().body(new MessageResponse("Incorrect pet status. Requires 'FREEZE'."));
     }
 
     @GetMapping("/organization/pets/{id}/userRequest")
@@ -188,9 +142,7 @@ public class ProfileeController {
     @DeleteMapping("/organization/pets/{id}/delUserRequest")
     public ResponseEntity<?> deleteRequestUser(@PathVariable("id") Long petId,
                                                @RequestParam(value = "username") String username) {
-        User user = userRepository.findByAuthId(authRepository.findByUsername(username).get().getId());
-        user.getPetSet().remove(petRepository.findById(petId).get());
-        userRepository.save(user);
-        return ResponseEntity.ok(new MessageResponse("Заявка удалена."));
+        petService.deleteRequestUser(petId, username);
+        return ResponseEntity.ok(new MessageResponse("Request deleted."));
     }
 }

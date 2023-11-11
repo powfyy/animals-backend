@@ -11,4 +11,5 @@ import java.util.Set;
 public interface UserRepository extends JpaRepository<User, Long> {
     public User findByAuthId (Long authId);
     public Set<User> findAllByPetSetId(Long petId);
+    public void deleteByAuthId(Long authId);
 }

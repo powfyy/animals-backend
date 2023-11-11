@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -59,6 +60,7 @@ public class AuthorizationController {
                 authDetails.getUsername(), role));
     }
 
+    @Transactional
     @PostMapping("/signup/user")
     public ResponseEntity<?> registerUser(@RequestBody SignupUserRequest signupUserRequest) {
 
@@ -79,6 +81,7 @@ public class AuthorizationController {
         return ResponseEntity.ok(new MessageResponse("User CREATED"));
     }
 
+    @Transactional
     @PostMapping ("/signup/organization")
     public ResponseEntity <?> registerOrganization(@RequestBody SignupOrganizationRequest signupOrganizationRequest){
         if (authRepository.existsByUsername(signupOrganizationRequest.getUsername())) {

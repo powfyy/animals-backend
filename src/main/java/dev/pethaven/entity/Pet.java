@@ -21,6 +21,7 @@ public class Pet {
     @Column (nullable = false)
     @Enumerated (EnumType.STRING)
     private PetGender gender;
+    @Enumerated (EnumType.STRING)
     @Column (nullable = false)
     private PetType typePet;
     @Column (nullable = false)
