@@ -5,6 +5,7 @@ import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.DeleteError;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class MinioService {
     private final MinioClient minioClient;
 
@@ -26,7 +28,7 @@ public class MinioService {
         this.minioClient = minioClient;
     }
 
-    public void createBucket(String bucketName) throws Exception {
+    public void createBucket(String bucketName) {
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {
@@ -36,11 +38,10 @@ public class MinioService {
                         " { \"Action\": \"s3:GetObject\", \"Effect\": \"Allow\", \"Principal\": \"*\"," +
                         " \"Resource\": \"arn:aws:s3:::" + bucketName + "/*\" } ], \"Version\": \"2012-10-17\" }";
                 minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucketName).config(policyJson).build());
-                System.out.println("bucket successfully created.");
+                log.info("bucket successfully created.");
             }
-        } catch (MinioException e) {
-            System.out.println("Error creating bucket: " + e.getMessage());
-            System.out.println("HTTP trace: " + e.httpTrace());
+        } catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+            log.error("Error create bucket: {}", e.getMessage());
         }
     }
 
@@ -49,7 +50,7 @@ public class MinioService {
             try {
                 InputStream fileInputStream = file.getInputStream();
             } catch (Exception e) {
-                System.out.println("Error: " + e);
+                log.error("Error: {}", e.getMessage());
             }
 
             try {
@@ -59,22 +60,17 @@ public class MinioService {
                         .stream(file.getInputStream(), file.getSize(), -1)
                         .contentType(file.getContentType())
                         .build());
-            } catch (MinioException e) {
-                System.out.println("Error occurred: " + e);
-                System.out.println("HTTP trace: " + e.httpTrace());
-            } catch (IOException e) {
-                System.out.println("IOException occurred: " + e);
-            } catch (InvalidKeyException | NoSuchAlgorithmException e) {
-                System.out.println("InvalidKeyException or NoSuchAlgorithmException occurred: " + e);
+            } catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+                log.error("Error upload file: {}", e.getMessage());
             }
         });
     }
 
-    public void removeBucket(String bucketName) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+    public void removeBucket(String bucketName) {
         try {
             minioClient.removeBucket(RemoveBucketArgs.builder().bucket(bucketName).build());
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | MinioException e) {
-            System.out.println("Error deleting bucket: " + e.getMessage());
+            log.error("Error remove: bucket {}", e.getMessage());
         }
     }
 
@@ -88,14 +84,14 @@ public class MinioService {
                             RemoveObjectsArgs.builder().bucket(bucketName).objects(objects).build());
             for (Result<DeleteError> result : results) {
                 DeleteError error = result.get();
-                System.out.println(
-                        "Error in deleting object " + error.objectName() + "; " + error.message());
+                log.error("Error in deleting object {}; {}", error.objectName(), error.message());
             }
         } catch (InvalidKeyException | MinioException | IOException | NoSuchAlgorithmException e) {
-            System.out.println("Error deleting files: " + e.getMessage());
+            log.error("Error deleting files: {}", e.getMessage());
         }
     }
-    public void removeFiles( List<String> photoRefs,String bucketName) {
+
+    public void removeFiles(List<String> photoRefs, String bucketName) {
         try {
             List<DeleteObject> objects = photoRefs.stream()
                     .map(DeleteObject::new)
@@ -105,11 +101,10 @@ public class MinioService {
                             RemoveObjectsArgs.builder().bucket(bucketName).objects(objects).build());
             for (Result<DeleteError> result : results) {
                 DeleteError error = result.get();
-                System.out.println(
-                        "Error in deleting object " + error.objectName() + "; " + error.message());
+                log.error("Error in deleting object {}; {}", error.objectName(), error.message());
             }
         } catch (InvalidKeyException | MinioException | IOException | NoSuchAlgorithmException e) {
-            System.out.println("Error deleting files: " + e.getMessage());
+            log.error("Error deleting files:{} ", e.getMessage());
         }
     }
 }

@@ -1,116 +1,95 @@
 package dev.pethaven.controllers;
 
-
 import dev.pethaven.dto.OrganizationDTO;
 import dev.pethaven.dto.PetDTO;
 import dev.pethaven.dto.UserDTO;
-import dev.pethaven.entity.*;
-import dev.pethaven.mappers.OrganizationMapper;
-import dev.pethaven.mappers.PetMapper;
+import dev.pethaven.entity.Pet;
+import dev.pethaven.entity.PetStatus;
+import dev.pethaven.exception.NotFoundException;
 import dev.pethaven.mappers.UserMapper;
 import dev.pethaven.pojo.MessageResponse;
 import dev.pethaven.pojo.SavePet;
-import dev.pethaven.repositories.*;
-import dev.pethaven.services.MinioService;
+import dev.pethaven.repositories.PetRepository;
+import dev.pethaven.services.OrganizationService;
 import dev.pethaven.services.PetService;
+import dev.pethaven.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.security.Principal;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/profile")
 public class ProfileeController {
     @Autowired
-    AuthRepository authRepository;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    OrganizationRepository organizationRepository;
-    @Autowired
     PetRepository petRepository;
-    @Autowired
-    PetPhotosRepository petPhotosRepository;
-    @Autowired
-    PetMapper petMapper;
     @Autowired
     UserMapper userMapper;
     @Autowired
-    OrganizationMapper organizationMapper;
-    @Autowired
     PetService petService;
     @Autowired
-    MinioService minioService;
+    OrganizationService organizationService;
+    @Autowired
+    UserService userService;
 
     @GetMapping("/user")
-    public UserDTO getUserInfo(Principal user) {
-        Auth currentAuth = (authRepository.findByUsername(user.getName())).get();
-        return userMapper.toDTO(userRepository.findByAuthId(currentAuth.getId()));
+    public UserDTO getCurrentUser(Principal principal) {
+        return userService.getCurrentUser(principal);
     }
+
     @PutMapping("/user")
-    public ResponseEntity<?> updateUser(Principal principal, @RequestBody UserDTO updatedUser){
-        User user = userRepository.findByAuthId(authRepository.findByUsername(principal.getName()).get().getId());
-        userMapper.updateUser(updatedUser,user);
-        userRepository.save(user);
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO updatedUser) {
+        userService.updateUser(updatedUser);
         return ResponseEntity.ok().body(new MessageResponse("User updated"));
     }
+
     @DeleteMapping("/user")
-    public ResponseEntity<?> deleteUser(Principal user){
-        userRepository.deleteByAuthId(authRepository.findByUsername(user.getName()).get().getId());
+    public ResponseEntity<?> deleteUser(Principal principal) {
+        userService.deleteCurrentUser(principal);
         return ResponseEntity.ok().body(new MessageResponse("User deleted"));
     }
+
     @GetMapping("/organization")
-    public OrganizationDTO getOrganization(Principal user) {
-        Auth currentAuth = (authRepository.findByUsername(user.getName())).get();
-        return organizationMapper.toDTO(organizationRepository.findByAuthId(currentAuth.getId()));
+    public OrganizationDTO getOrganization(Principal principal) {
+        return organizationService.getCurrentOrganization(principal);
     }
 
     @PutMapping("/organization")
-    public void updateOrganization(Principal user, @RequestBody OrganizationDTO updatedOrganization) {
-        Auth currentAuth = (authRepository.findByUsername(user.getName())).get();
-        Organization organization = organizationRepository.findByAuthId(currentAuth.getId());
-        organizationMapper.updateOrganization(updatedOrganization, organization);
-        organizationRepository.save(organization);
+    public ResponseEntity<?> updateOrganization(@RequestBody OrganizationDTO updatedOrganization) {
+        organizationService.updateOrganization(updatedOrganization);
+        return ResponseEntity.ok().body(new MessageResponse("Organization updated"));
     }
 
     @DeleteMapping("/organization")
-    public void deleteOrganization(Principal user) {
-        organizationRepository.deleteByAuthId(authRepository.findByUsername(user.getName()).get().getId());
+    public ResponseEntity<?> deleteOrganization(Principal principal) {
+        organizationService.deleteCurrentOrganization(principal);
+        return ResponseEntity.ok().body(new MessageResponse("Organization deleted"));
     }
 
     @GetMapping("/organization/pets")
-    public List<PetDTO> getAllPets(Principal user) {
-        Auth currentAuth = (authRepository.findByUsername(user.getName())).get();
-        List<Pet> petsArray = petRepository.findByOrganizationId(organizationRepository.findByAuthId(currentAuth.getId()).getId());
-        return petsArray.stream()
-                .map(el -> petMapper.toDTO(el))
-                .collect(Collectors.toList());
+    public List<PetDTO> getAllPets(Principal principal) {
+        return petService.getAllPetsCurrentOrganization(principal);
     }
 
     @PostMapping("/organization/pets")
-    @Transactional
     public ResponseEntity<?> addPet(Principal user, @ModelAttribute SavePet newPetInfo) {
         petService.addPet(user, newPetInfo);
         return ResponseEntity.ok().body(new MessageResponse("Pet created"));
     }
 
-    @PutMapping ("/organization/pets/{id}")
-    @Transactional
-    public ResponseEntity <?> updatePet (@PathVariable("id") Long petId, @ModelAttribute SavePet updatedPet){
-       petService.updatePet(petId, updatedPet);
-       return ResponseEntity.ok().body(new MessageResponse("Pet updated"));
+    @PutMapping("/organization/pets/{id}")
+    public ResponseEntity<?> updatePet(@PathVariable("id") Long petId,@ModelAttribute SavePet updatedPet) {
+        petService.updatePet(petId, updatedPet);
+        return ResponseEntity.ok().body(new MessageResponse("Pet updated"));
     }
+
     @DeleteMapping("/organization/pets/{id}")
-    @Transactional
     public ResponseEntity<?> deletePet(@PathVariable("id") Long id) {
         petService.deletePet(id);
         return ResponseEntity.ok().body(new MessageResponse("Pet deleted."));
@@ -119,14 +98,16 @@ public class ProfileeController {
     @PatchMapping("/organization/pets/{id}/status")
     public ResponseEntity<?> updateStatusPet(@PathVariable("id") Long petId,
                                              @RequestParam(value = "newStatus") String newStatus) {
-       petService.updateStatusPet(petId,newStatus);
+        petService.updateStatusPet(petId, newStatus);
         return ResponseEntity.ok().body(new MessageResponse("Status updated"));
     }
 
 
     @PostMapping("/organization/pets/{id}/adopt")
-    public ResponseEntity<?> adoptPet(@PathVariable("id") Long petId, @RequestBody String username) {
-        Pet pet = petRepository.findById(petId).get();
+    public ResponseEntity<?> adoptPet(@PathVariable("id")  @NotNull(message = "Id cannot be null") Long petId,
+                                      @RequestBody String username) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new NotFoundException("Pet is not found"));
         if (pet.getStatus() == PetStatus.FREEZE) {
             petService.adoptPet(username, pet);
             return ResponseEntity.ok(new MessageResponse("Pet adopted"));
@@ -135,13 +116,16 @@ public class ProfileeController {
     }
 
     @GetMapping("/organization/pets/{id}/userRequest")
-    public Set<UserDTO> getUserRequsts(@PathVariable("id") Long petId) {
-        return userMapper.toDtoSet(petRepository.findById(petId).get().getUserSet());
+    public Set<UserDTO> getUsersRequsts(@PathVariable("id") @NotNull(message = "Id cannot be null")Long petId) {
+        return userMapper.toDtoSet(petRepository
+                .findById(petId).orElseThrow(() -> new NotFoundException("Pet is not found"))
+                .getUserSet());
     }
 
     @DeleteMapping("/organization/pets/{id}/delUserRequest")
     public ResponseEntity<?> deleteRequestUser(@PathVariable("id") Long petId,
-                                               @RequestParam(value = "username") String username) {
+                                               @RequestParam(value = "username") @Size(min = 4, message = "username must be minimum 4 chars")
+                                               String username) {
         petService.deleteRequestUser(petId, username);
         return ResponseEntity.ok(new MessageResponse("Request deleted."));
     }

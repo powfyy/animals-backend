@@ -8,7 +8,7 @@ import javax.annotation.Generated;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-11-10T14:03:32+0300",
+    date = "2023-11-16T16:15:06+0300",
     comments = "version: 1.4.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.1.1.jar, environment: Java 1.8.0_372 (Amazon.com Inc.)"
 )
 public class OrganizationMapperImpl implements OrganizationMapper {
@@ -23,10 +23,10 @@ public class OrganizationMapperImpl implements OrganizationMapper {
 
         organizationDTO.setUsername( organizationAuthUsername( organization ) );
         organizationDTO.setNameOrganization( organization.getNameOrganization() );
+        organizationDTO.setCity( organization.getCity() );
         organizationDTO.setPassportSeries( organization.getPassportSeries() );
         organizationDTO.setPassportNumber( organization.getPassportNumber() );
         organizationDTO.setPhoneNumber( organization.getPhoneNumber() );
-        organizationDTO.setCity( organization.getCity() );
 
         return organizationDTO;
     }

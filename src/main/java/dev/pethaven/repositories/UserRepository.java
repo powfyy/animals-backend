@@ -9,7 +9,9 @@ import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    public User findByAuthId (Long authId);
+    public Optional<User> findByAuthId(Long authId);
+
     public Set<User> findAllByPetSetId(Long petId);
+
     public void deleteByAuthId(Long authId);
 }

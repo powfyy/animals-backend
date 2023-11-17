@@ -4,6 +4,7 @@ import dev.pethaven.dto.OrganizationDTO;
 import dev.pethaven.dto.OrganizationDtoCityName;
 import dev.pethaven.dto.PetDTO;
 import dev.pethaven.entity.*;
+import dev.pethaven.exception.NotFoundException;
 import dev.pethaven.mappers.OrganizationMapper;
 import dev.pethaven.mappers.PetMapper;
 import dev.pethaven.pojo.FilterFields;
@@ -12,12 +13,15 @@ import dev.pethaven.repositories.AuthRepository;
 import dev.pethaven.repositories.OrganizationRepository;
 import dev.pethaven.repositories.PetRepository;
 import dev.pethaven.repositories.UserRepository;
+import dev.pethaven.services.OrganizationService;
 import dev.pethaven.services.PetService;
+import dev.pethaven.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
@@ -29,26 +33,20 @@ import java.util.stream.Collectors;
 public class HomeController {
 
     @Autowired
-    AuthRepository authRepository;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    OrganizationRepository organizationRepository;
-    @Autowired
     PetRepository petRepository;
     @Autowired
     PetMapper petMapper;
     @Autowired
-    OrganizationMapper organizationMapper;
-    @Autowired
     PetService petService;
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    OrganizationService organizationService;
 
     @PostMapping(value = "/pets/{id}")
-    public ResponseEntity<?> requestForPet(@PathVariable("id") Long petId, Principal user) {
-        Auth currentAuth = (authRepository.findByUsername(user.getName())).get();
-        User currentUser = userRepository.findByAuthId(currentAuth.getId());
-        currentUser.getPetSet().add(petRepository.findById(petId).get());
-        userRepository.save(currentUser);
+    public ResponseEntity<?> requestForPet(@PathVariable("id") Long petId, Principal principal) {
+        userService.requestForPet(principal,petId);
         return ResponseEntity.ok().body(new MessageResponse("Request sent"));
     }
 
@@ -62,22 +60,17 @@ public class HomeController {
 
     @GetMapping(value = "/organizations")
     public List<OrganizationDtoCityName> getAllOrganizations() {
-        return organizationRepository.findAll().stream()
-                .map(el -> organizationMapper.toDtoCityName(el))
-                .collect(Collectors.toList());
+        return organizationService.getOrganizationCityAndName();
     }
 
     @GetMapping(value = "/pets/{id}")
-    public PetDTO getPet(@PathVariable("id") Long petId) {
-        return petMapper.toDTO(petRepository.findById(petId).get());
+    public PetDTO getPet(@PathVariable("id") @NotNull(message = "Id cannot be null") Long petId) {
+        return petMapper.toDTO(petRepository.findById(petId)
+                .orElseThrow(()-> new NotFoundException("Pet is not found")));
     }
 
     @GetMapping(value = "/pets/{id}/request")
     public Map<String, Boolean> checkRequest(@PathVariable("id") Long petId, Principal principal) {
-        User user = userRepository.findByAuthId(authRepository.findByUsername(principal.getName()).get().getId());
-        if (user.getPetSet().contains(petRepository.findById(petId).get())) {
-            return Collections.singletonMap("isThereRequest", true);
-        }
-        return Collections.singletonMap("isThereRequest", false);
+        return userService.checkRequest(principal, petId);
     }
 }

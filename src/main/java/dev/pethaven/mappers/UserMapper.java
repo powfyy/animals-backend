@@ -18,5 +18,10 @@ public interface UserMapper {
     @Mapping(source = "auth.username", target = "username")
     Set<UserDTO> toDtoSet (Set <User> userSet);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "auth", ignore = true)
+    @Mapping(target = "petSet", ignore = true)
+    @Mapping(target = "chats", ignore = true)
+    @Mapping(target = "messages", ignore = true)
     void updateUser(UserDTO userDTO, @MappingTarget User user);
 }

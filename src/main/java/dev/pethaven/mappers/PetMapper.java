@@ -8,12 +8,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import javax.crypto.spec.PSource;
+
 @Mapper
 public interface PetMapper {
 
     @Mapping(source = "petPhotos", target = "photoRefs")
     @Mapping(source = "organization.city", target = "city")
     @Mapping(source = "organization.nameOrganization", target = "nameOrganization")
+    @Mapping(source = "organization.auth.username", target = "usernameOrganization")
     PetDTO toDTO(Pet pet);
     @Mapping(target = "organization",ignore = true)
     @Mapping(target = "user",ignore = true)

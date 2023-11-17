@@ -3,6 +3,7 @@ package dev.pethaven.entity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,19 +27,17 @@ public class User {
     @JoinColumn(nullable = false)
     private Auth auth;
 
-    public Auth getAuth() {
-        return auth;
-    }
-
-    public void setAuth(Auth auth) {
-        this.auth = auth;
-    }
-
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinTable(name = "user_pet",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "pet_id"))
     private Set<Pet> petSet = new HashSet<>();
+
+    @OneToMany (mappedBy = "user",cascade = CascadeType.ALL)
+    private Set<Chat> chats = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Message> messages = new ArrayList<>();
 
     public User(Long id, String name, String lastname, String phoneNumber, Auth auth) {
         this.id = id;

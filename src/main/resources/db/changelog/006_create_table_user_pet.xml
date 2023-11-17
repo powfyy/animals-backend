@@ -15,11 +15,12 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="addForeignKeyConstraintUser" author="d.srb@yandex.ru">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_pet"
-                                 constraintName="fk_user_pet_user"
-                                 referencedColumnNames="id" referencedTableName="users"/>
-    </changeSet>
+<!--    <changeSet id="addForeignKeyConstraintUser" author="d.srb@yandex.ru">-->
+<!--        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_pet"-->
+<!--                                 constraintName="fk_user_pet_user"-->
+<!--                                 referencedColumnNames="id" referencedTableName="users"/>-->
+<!--    </changeSet>-->
+<!--    -->
     <changeSet id="addForeignKeyConstraintPet" author="d.srb@yandex.ru">
         <addForeignKeyConstraint baseColumnNames="pet_id"  baseTableName="user_pet"
                                  constraintName="fk_user_pet_pet"

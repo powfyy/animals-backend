@@ -3,9 +3,7 @@ package dev.pethaven.configs;
 import dev.pethaven.auth.AuthEntryPointJwt;
 import dev.pethaven.auth.AuthTokenFilter;
 import dev.pethaven.entity.Role;
-import dev.pethaven.mappers.OrganizationMapper;
-import dev.pethaven.mappers.PetMapper;
-import dev.pethaven.mappers.UserMapper;
+import dev.pethaven.mappers.*;
 import dev.pethaven.services.AuthDetailsServiceImpl;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +69,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public UserMapper userMapper() {return Mappers.getMapper(UserMapper.class);}
     @Bean
     public OrganizationMapper organizationMapper() {return Mappers.getMapper(OrganizationMapper.class);}
+    @Bean
+    public ChatMapper chatMapper() {return Mappers.getMapper(ChatMapper.class);}
+    @Bean
+    public MessageMapper messageMapper() {return Mappers.getMapper(MessageMapper.class);}
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -83,6 +85,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/profile/organization").hasAnyAuthority(Role.ORG.name())
                 .antMatchers("/api/profile/user").hasAnyAuthority(Role.USER.name(), Role.ADMIN.name())
                 .antMatchers("/api/home/**").permitAll()
+                .antMatchers("/api/chats/**").hasAnyAuthority(Role.ORG.name(), Role.USER.name())
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

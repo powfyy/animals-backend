@@ -1,6 +1,7 @@
 package dev.pethaven.mappers;
 
 import dev.pethaven.dto.PetDTO;
+import dev.pethaven.entity.Auth;
 import dev.pethaven.entity.Organization;
 import dev.pethaven.entity.Pet;
 import dev.pethaven.entity.PetGender;
@@ -16,7 +17,7 @@ import javax.annotation.Generated;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-11-10T14:03:32+0300",
+    date = "2023-11-16T16:15:06+0300",
     comments = "version: 1.4.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.1.1.jar, environment: Java 1.8.0_372 (Amazon.com Inc.)"
 )
 public class PetMapperImpl implements PetMapper {
@@ -32,6 +33,7 @@ public class PetMapperImpl implements PetMapper {
         petDTO.setPhotoRefs( petPhotosListToStringList( pet.getPetPhotos() ) );
         petDTO.setCity( petOrganizationCity( pet ) );
         petDTO.setNameOrganization( petOrganizationNameOrganization( pet ) );
+        petDTO.setUsernameOrganization( petOrganizationAuthUsername( pet ) );
         petDTO.setId( pet.getId() );
         petDTO.setName( pet.getName() );
         if ( pet.getGender() != null ) {
@@ -174,5 +176,24 @@ public class PetMapperImpl implements PetMapper {
             return null;
         }
         return nameOrganization;
+    }
+
+    private String petOrganizationAuthUsername(Pet pet) {
+        if ( pet == null ) {
+            return null;
+        }
+        Organization organization = pet.getOrganization();
+        if ( organization == null ) {
+            return null;
+        }
+        Auth auth = organization.getAuth();
+        if ( auth == null ) {
+            return null;
+        }
+        String username = auth.getUsername();
+        if ( username == null ) {
+            return null;
+        }
+        return username;
     }
 }

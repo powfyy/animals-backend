@@ -6,8 +6,6 @@ import dev.pethaven.entity.Organization;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Service;
 
 @Mapper
 public interface OrganizationMapper {
@@ -17,5 +15,7 @@ public interface OrganizationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "auth", ignore = true)
     @Mapping(target = "pets", ignore = true)
+    @Mapping(target = "chats", ignore = true)
+    @Mapping(target = "messages", ignore = true)
     void updateOrganization (OrganizationDTO organizationDTO, @MappingTarget Organization org);
 }

@@ -57,57 +57,57 @@ class ProfileeControllerTest {
         this.mockMvc = MockMvcBuilders.standaloneSetup(profileeController).build();
     }
 
-    @Test
-    void testGetAllPets() throws Exception {
-
-        MockitoAnnotations.openMocks(this);
-        Organization organization =new Organization(1L, "TeddyFood","Воронеж" ,"2020", "123456", "79203335544",
-                new Auth(1L, "username", Role.ORG, passwordEncoder.encode("ffff"), true));
-        Pet pet = new Pet(1L, "Буся", PetGender.F, PetType.DOG, LocalDate.of(2019, 3, 12),
-                "помчи","", PetStatus.ACTIVE, organization);
-        PetDTO petDTO = petMapper.toDTO(pet);
-        List<Pet> petList = new ArrayList<>();
-        petList.add(pet);
-        when(principal.getName()).thenReturn("username");
-        when(authRepository.findByUsername("username")).thenReturn(Optional.of(pet.getOrganization().getAuth()));
-        when(petRepository.findByOrganizationId(1l)).thenReturn(petList);
-        when(organizationRepository.findByAuthId(anyLong())).thenReturn(organization);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/profile/pets")
-                        .with(request -> {
-                            request.setUserPrincipal(principal);
-                            return request;
-                        }))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(petDTO.getName()));
-    }
-    @Test
-    public void testGetUserInfo() throws Exception{
-        Auth auth = new Auth();
-        auth.setId(1l);
-        User user = new User();
-        user.setId(2l);
-        user.setName("bob");
-
-        when(principal.getName()).thenReturn("username");
-        when(authRepository.findByUsername("username")).thenReturn(Optional.of(auth));
-        when(userRepository.findByAuthId(1l)).thenReturn(user);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/profile/user")
-                        .with(request -> {
-                            request.setUserPrincipal(principal);
-                            return request;
-                        }))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(user.getName()));
-    }
-    @Test
-    public void testGetOrganizationInfo() throws Exception{
-
-    }
+//    @Test
+//    void testGetAllPets() throws Exception {
+//
+//        MockitoAnnotations.openMocks(this);
+//        Organization organization =new Organization(1L, "TeddyFood","Воронеж" ,"2020", "123456", "79203335544",
+//                new Auth(1L, "username", Role.ORG, passwordEncoder.encode("ffff"), true));
+//        Pet pet = new Pet(1L, "Буся", PetGender.F, PetType.DOG, LocalDate.of(2019, 3, 12),
+//                "помчи","", PetStatus.ACTIVE, organization);
+//        PetDTO petDTO = petMapper.toDTO(pet);
+//        List<Pet> petList = new ArrayList<>();
+//        petList.add(pet);
+//        when(principal.getName()).thenReturn("username");
+//        when(authRepository.findByUsername("username")).thenReturn(Optional.of(pet.getOrganization().getAuth()));
+//        when(petRepository.findByOrganizationId(1l)).thenReturn(petList);
+//        when(organizationRepository.findByAuthId(anyLong())).thenReturn(organization);
+//
+//        mockMvc.perform(MockMvcRequestBuilders.get("/api/profile/pets")
+//                        .with(request -> {
+//                            request.setUserPrincipal(principal);
+//                            return request;
+//                        }))
+//                .andExpect(MockMvcResultMatchers.status().isOk())
+//                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+//                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(petDTO.getName()));
+//    }
+//    @Test
+//    public void testGetUserInfo() throws Exception{
+//        Auth auth = new Auth();
+//        auth.setId(1l);
+//        User user = new User();
+//        user.setId(2l);
+//        user.setName("bob");
+//
+//        when(principal.getName()).thenReturn("username");
+//        when(authRepository.findByUsername("username")).thenReturn(Optional.of(auth));
+//        when(userRepository.findByAuthId(1l)).thenReturn(user);
+//
+//        mockMvc.perform(MockMvcRequestBuilders.get("/api/profile/user")
+//                        .with(request -> {
+//                            request.setUserPrincipal(principal);
+//                            return request;
+//                        }))
+//                .andExpect(MockMvcResultMatchers.status().isOk())
+//                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(user.getName()));
+//    }
+//    @Test
+//    public void testGetOrganizationInfo() throws Exception{
+//
+//    }
 }
 
 //

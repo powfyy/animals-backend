@@ -1,2 +1,7 @@
-package dev.pethaven.exception;public class NotFoundException {
+package dev.pethaven.exception;
+
+public class NotFoundException extends RuntimeException {
+    public NotFoundException(String message) {
+        super(message);
+    }
 }

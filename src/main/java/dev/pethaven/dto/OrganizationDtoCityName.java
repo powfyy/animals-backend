@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class OrganizationDtoCityName {
-    String nameOrganization;
-    String city;
+    private String nameOrganization;
+    private String city;
 }

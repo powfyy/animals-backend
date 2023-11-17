@@ -3,7 +3,10 @@ package dev.pethaven.entity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table (name="organizations")
@@ -30,6 +33,12 @@ public class Organization {
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
     private List<Pet> pets;
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    private Set<Chat> chats = new HashSet<>();
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    private List<Message> messages = new ArrayList<>();
 
     public Organization(Long id, String nameOrganization,String city, String passportSeries, String passportNumber, String phoneNumber, Auth auth) {
         this.id = id;

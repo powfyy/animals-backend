@@ -1,4 +1,4 @@
-package dev.pethaven.utils;
+package dev.pethaven.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

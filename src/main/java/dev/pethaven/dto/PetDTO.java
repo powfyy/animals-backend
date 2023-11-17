@@ -21,4 +21,5 @@ public class PetDTO {
     private List<String> photoRefs;
     private String city;
     private String nameOrganization;
+    private String usernameOrganization;
 }
