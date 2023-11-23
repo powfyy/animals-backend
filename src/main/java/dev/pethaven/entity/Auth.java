@@ -11,10 +11,8 @@ import javax.persistence.*;
 @Getter @Setter
 @NoArgsConstructor
 public class Auth {
-
-
     @Id
-    @GeneratedValue (strategy = GenerationType.AUTO)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String username;

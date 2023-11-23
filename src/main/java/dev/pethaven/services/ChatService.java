@@ -34,11 +34,13 @@ public class ChatService {
     public List<ChatDTO> getAllChats(Principal user) {
         Auth auth = authRepository.findByUsername(user.getName())
                 .orElseThrow(() -> new NotFoundException("Current user not found"));
+
         if (auth.getRole() == Role.ORG) {
             List<Chat> chats = chatRepository.findByOrganizationId(organizationRepository.findByAuthId(auth.getId())
                     .orElseThrow(() -> new NotFoundException("Organization not found")).getId());
             return chatMapper.toDtoList(chats);
         }
+
         List<Chat> chats = chatRepository.findByUserId(userRepository.findByAuthId(auth.getId())
                 .orElseThrow(() -> new NotFoundException("User not found")).getId());
         return chatMapper.toDtoList(chats);
@@ -46,9 +48,11 @@ public class ChatService {
 
     public void createChat(@NotNull(message = "Organization's username can't be null") String organizationUsername,
                            @NotNull(message = "User's username can't be null") String userUsername) {
-        User user = userRepository.findByAuthId(authRepository.findByUsername(userUsername)
+        User user = userRepository.findByAuthId(
+                authRepository.findByUsername(userUsername)
                         .orElseThrow(() -> new NotFoundException("Auth is not found"))
-                        .getId())
+                        .getId()
+                )
                 .orElseThrow(() -> new NotFoundException("User is not found"));
         Organization organization = organizationRepository.findByAuthId(
                 authRepository.findByUsername(organizationUsername)
@@ -58,4 +62,10 @@ public class ChatService {
         Chat chat = new Chat(null, user, organization);
         chatRepository.save(chat);
     }
+
+    public Chat findChatByUserUsernameAndOrgUsername(String orgUsername, String userUsername) {
+       return chatRepository.findByOrganizationAuthUsernameAndUserAuthUsername(orgUsername, userUsername)
+               .orElseThrow(() -> new NotFoundException("Chat not found"));
+    }
+
 }

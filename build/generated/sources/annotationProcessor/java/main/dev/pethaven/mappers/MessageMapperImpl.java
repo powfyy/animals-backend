@@ -11,8 +11,8 @@ import javax.annotation.Generated;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-11-16T17:57:37+0300",
-    comments = "version: 1.4.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.1.1.jar, environment: Java 1.8.0_372 (Amazon.com Inc.)"
+    date = "2023-11-23T13:01:11+0300",
+    comments = "version: 1.4.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.4.jar, environment: Java 20.0.1 (Oracle Corporation)"
 )
 public class MessageMapperImpl implements MessageMapper {
 
@@ -22,21 +22,21 @@ public class MessageMapperImpl implements MessageMapper {
             return null;
         }
 
-        String arg0 = null;
-        String arg1 = null;
-        Long arg2 = null;
-        String arg3 = null;
-        String arg4 = null;
+        Long chatId = null;
+        String organizationUsername = null;
+        String userUsername = null;
+        String message1 = null;
+        String date = null;
 
-        MessageDTO messageDTO = new MessageDTO( arg0, arg1, arg2, arg3, arg4 );
-
-        messageDTO.setChatId( messageChatId( message ) );
-        messageDTO.setOrganizationUsername( messageOrganizationAuthUsername( message ) );
-        messageDTO.setUserUsername( messageUserAuthUsername( message ) );
-        messageDTO.setMessage( message.getMessage() );
+        chatId = messageChatId( message );
+        organizationUsername = messageOrganizationAuthUsername( message );
+        userUsername = messageUserAuthUsername( message );
+        message1 = message.getMessage();
         if ( message.getDate() != null ) {
-            messageDTO.setDate( DateTimeFormatter.ISO_LOCAL_DATE_TIME.format( message.getDate() ) );
+            date = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format( message.getDate() );
         }
+
+        MessageDTO messageDTO = new MessageDTO( message1, date, chatId, organizationUsername, userUsername );
 
         return messageDTO;
     }

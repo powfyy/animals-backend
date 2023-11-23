@@ -2,22 +2,15 @@ package dev.pethaven.controllers;
 
 import dev.pethaven.dto.ChatDTO;
 import dev.pethaven.dto.MessageDTO;
-import dev.pethaven.entity.Pet;
-import dev.pethaven.exception.NotFoundException;
-import dev.pethaven.pojo.LoginRequest;
-import dev.pethaven.pojo.MessageResponse;
+import dev.pethaven.dto.MessageResponse;
 import dev.pethaven.repositories.*;
 import dev.pethaven.services.ChatService;
 import dev.pethaven.services.MessageService;
-import kotlin._Assertions;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.util.List;

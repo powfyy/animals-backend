@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '2.7.13'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+//	id 'com.github.johnrengelman.shadow' version '7.0.0' // создает jar
 }
 
 group = 'dev'
@@ -19,33 +20,36 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-	implementation 'org.projectlombok:lombok:1.18.8'
-	annotationProcessor 'org.projectlombok:lombok:1.18.8'
-
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+//Lombok
+	implementation 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+//JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation 'javax.xml.bind:jaxb-api:2.3.1'
-
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+//Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-
+//DB
 	implementation 'org.liquibase:liquibase-core:4.5.0'
 	implementation 'org.postgresql:postgresql:42.3.1'
-
+//MapStruct
 	implementation 'org.mapstruct:mapstruct:1.4.2.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
-
+//Minio
 	implementation("io.minio:minio:8.5.6")
-
+//Transactional
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework:spring-tx'
-
+//Validate
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+//TestContainers
+	testImplementation "org.testcontainers:postgresql:1.19.2"
+	testImplementation 'org.testcontainers:testcontainers:1.19.2'
+	testImplementation 'org.testcontainers:junit-jupiter:1.19.2'
+//Security Mock
+	testImplementation 'org.springframework.security:spring-security-test:5.5.1'
 }
 
 

@@ -4,8 +4,8 @@ import dev.pethaven.dto.PetDTO;
 import dev.pethaven.entity.*;
 import dev.pethaven.exception.NotFoundException;
 import dev.pethaven.mappers.PetMapper;
-import dev.pethaven.pojo.FilterFields;
-import dev.pethaven.pojo.SavePet;
+import dev.pethaven.dto.FilterFields;
+import dev.pethaven.dto.SavePet;
 import dev.pethaven.repositories.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.security.InvalidParameterException;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -82,7 +83,7 @@ public class PetService {
     }
 
     @Transactional
-    public void updatePet(@NotNull(message = "Id cannot be null") Long petId,@Valid SavePet updatedPet) {
+    public void updatePet(@NotNull(message = "Id cannot be null") Long petId, @Valid SavePet updatedPet) {
         String bucketName = petId.toString() + "-" + updatedPet.getTypePet().toLowerCase();
         Pet oldPet = petRepository.findById(petId).orElseThrow(() -> new NotFoundException("Pet not found"));
         if (!updatedPet.getDeletedPhotoRefs().isEmpty()) {
@@ -149,8 +150,13 @@ public class PetService {
     public void updateStatusPet(@NotNull(message = "Id cannot be null") Long petId, String newStatus) {
         Pet updatedPet = petRepository.findById(petId)
                 .orElseThrow(() -> new NotFoundException("Pet not found"));
-        updatedPet.setStatus(PetStatus.valueOf(newStatus));
-        petRepository.save(updatedPet);
+        if (updatedPet.getStatus().canTransitionTo(PetStatus.valueOf(newStatus))) {
+            updatedPet.setStatus(PetStatus.valueOf(newStatus));
+            petRepository.save(updatedPet);
+        }
+        else {
+            throw new InvalidParameterException("Invalid status");
+        }
     }
 
 }

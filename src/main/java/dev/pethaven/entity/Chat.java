@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Chat {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private User user;

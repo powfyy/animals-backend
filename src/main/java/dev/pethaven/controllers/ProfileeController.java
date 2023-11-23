@@ -7,8 +7,8 @@ import dev.pethaven.entity.Pet;
 import dev.pethaven.entity.PetStatus;
 import dev.pethaven.exception.NotFoundException;
 import dev.pethaven.mappers.UserMapper;
-import dev.pethaven.pojo.MessageResponse;
-import dev.pethaven.pojo.SavePet;
+import dev.pethaven.dto.MessageResponse;
+import dev.pethaven.dto.SavePet;
 import dev.pethaven.repositories.PetRepository;
 import dev.pethaven.services.OrganizationService;
 import dev.pethaven.services.PetService;
@@ -17,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.security.InvalidParameterException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Set;
@@ -84,7 +84,7 @@ public class ProfileeController {
     }
 
     @PutMapping("/organization/pets/{id}")
-    public ResponseEntity<?> updatePet(@PathVariable("id") Long petId,@ModelAttribute SavePet updatedPet) {
+    public ResponseEntity<?> updatePet(@PathVariable("id") Long petId, @ModelAttribute SavePet updatedPet) {
         petService.updatePet(petId, updatedPet);
         return ResponseEntity.ok().body(new MessageResponse("Pet updated"));
     }
@@ -104,7 +104,7 @@ public class ProfileeController {
 
 
     @PostMapping("/organization/pets/{id}/adopt")
-    public ResponseEntity<?> adoptPet(@PathVariable("id")  @NotNull(message = "Id cannot be null") Long petId,
+    public ResponseEntity<?> adoptPet(@PathVariable("id") @NotNull(message = "Id cannot be null") Long petId,
                                       @RequestBody String username) {
         Pet pet = petRepository.findById(petId)
                 .orElseThrow(() -> new NotFoundException("Pet is not found"));
@@ -116,7 +116,7 @@ public class ProfileeController {
     }
 
     @GetMapping("/organization/pets/{id}/userRequest")
-    public Set<UserDTO> getUsersRequsts(@PathVariable("id") @NotNull(message = "Id cannot be null")Long petId) {
+    public Set<UserDTO> getUsersRequsts(@PathVariable("id") @NotNull(message = "Id cannot be null") Long petId) {
         return userMapper.toDtoSet(petRepository
                 .findById(petId).orElseThrow(() -> new NotFoundException("Pet is not found"))
                 .getUserSet());

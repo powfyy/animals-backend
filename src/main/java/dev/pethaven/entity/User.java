@@ -14,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String name;
@@ -23,7 +23,7 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @OneToOne (cascade = CascadeType.MERGE)
+    @OneToOne (cascade = CascadeType.ALL)
     @JoinColumn(nullable = false)
     private Auth auth;
 

@@ -1,8 +1,7 @@
 package dev.pethaven.exception;
 
-import dev.pethaven.pojo.MessageResponse;
+import dev.pethaven.dto.MessageResponse;
 import io.minio.errors.MinioException;
-import liquibase.pro.packaged.S;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,5 +57,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errors);
+    }
+
+    @ExceptionHandler(InvalidParameterException.class)
+    public ResponseEntity<MessageResponse> handleInvalidParameterException(InvalidParameterException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponse(exception.getMessage()));
     }
 }

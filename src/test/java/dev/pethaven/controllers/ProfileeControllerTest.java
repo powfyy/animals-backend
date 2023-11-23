@@ -50,12 +50,17 @@ class ProfileeControllerTest {
     private PetMapper petMapper;
     @Mock
     private Principal principal;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     public void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(profileeController).build();
     }
+
+    //mockmvc
+    //testcontainers
+    //docker, docker-compose
 
 //    @Test
 //    void testGetAllPets() throws Exception {

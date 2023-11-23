@@ -1,7 +1,7 @@
 package dev.pethaven.services;
 
 import dev.pethaven.entity.*;
-import dev.pethaven.pojo.FilterFields;
+import dev.pethaven.dto.FilterFields;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;

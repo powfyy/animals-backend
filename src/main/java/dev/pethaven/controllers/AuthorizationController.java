@@ -1,11 +1,11 @@
 package dev.pethaven.controllers;
 
 import dev.pethaven.auth.JwtUtils;
+import dev.pethaven.dto.*;
 import dev.pethaven.entity.Auth;
 import dev.pethaven.entity.Organization;
 import dev.pethaven.entity.Role;
 import dev.pethaven.entity.User;
-import dev.pethaven.pojo.*;
 import dev.pethaven.repositories.AuthRepository;
 import dev.pethaven.repositories.OrganizationRepository;
 import dev.pethaven.repositories.UserRepository;
@@ -68,7 +68,7 @@ public class AuthorizationController {
 
     @Transactional
     @PostMapping("/signup/user")
-    public ResponseEntity<?> registerUser(@RequestBody SignupUserRequest signupUserRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupUserRequest signupUserRequest) {
 
         if (authRepository.existsByUsername(signupUserRequest.getUsername())) {
             return ResponseEntity
@@ -89,7 +89,7 @@ public class AuthorizationController {
 
     @Transactional
     @PostMapping ("/signup/organization")
-    public ResponseEntity <?> registerOrganization(@RequestBody SignupOrganizationRequest signupOrganizationRequest){
+    public ResponseEntity <?> registerOrganization(@Valid @RequestBody SignupOrganizationRequest signupOrganizationRequest){
         if (authRepository.existsByUsername(signupOrganizationRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()

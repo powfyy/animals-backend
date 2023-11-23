@@ -3,12 +3,10 @@ package dev.pethaven.mappers;
 import dev.pethaven.dto.PetDTO;
 import dev.pethaven.entity.Pet;
 import dev.pethaven.entity.PetPhotos;
-import dev.pethaven.pojo.SavePet;
+import dev.pethaven.dto.SavePet;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-
-import javax.crypto.spec.PSource;
 
 @Mapper
 public interface PetMapper {

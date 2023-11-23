@@ -52,7 +52,7 @@ public class MessageService {
                 LocalDateTime.parse(messageDTO.getDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")),
                 chatRepository.findById(messageDTO.getChatId())
                         .orElseThrow(() -> new NotFoundException("Chat not found")));
-        if (messageDTO.getOrganizationUsername() == null) {
+        if (messageDTO.getUserUsername() != null) {
             newMessage.setUser(userRepository.findByAuthId(
                             authRepository.findByUsername(messageDTO.getUserUsername())
                                     .orElseThrow(() -> new NotFoundException("Auth not found")).getId())

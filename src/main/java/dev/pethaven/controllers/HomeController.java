@@ -1,18 +1,12 @@
 package dev.pethaven.controllers;
 
-import dev.pethaven.dto.OrganizationDTO;
 import dev.pethaven.dto.OrganizationDtoCityName;
 import dev.pethaven.dto.PetDTO;
-import dev.pethaven.entity.*;
 import dev.pethaven.exception.NotFoundException;
-import dev.pethaven.mappers.OrganizationMapper;
 import dev.pethaven.mappers.PetMapper;
-import dev.pethaven.pojo.FilterFields;
-import dev.pethaven.pojo.MessageResponse;
-import dev.pethaven.repositories.AuthRepository;
-import dev.pethaven.repositories.OrganizationRepository;
+import dev.pethaven.dto.FilterFields;
+import dev.pethaven.dto.MessageResponse;
 import dev.pethaven.repositories.PetRepository;
-import dev.pethaven.repositories.UserRepository;
 import dev.pethaven.services.OrganizationService;
 import dev.pethaven.services.PetService;
 import dev.pethaven.services.UserService;
@@ -23,10 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/home")
@@ -53,7 +45,7 @@ public class HomeController {
     @PostMapping(value = "/pets")
     public Page<PetDTO> getFilteredPets(
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "12") int size,
+            @RequestParam(required = false, defaultValue = "15") int size,
             @RequestBody FilterFields filterFields) {
         return petService.getFilteredPets(page,size,filterFields);
     }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
@@ -50,6 +51,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void deleteCurrentUser(Principal principal) {
         userRepository.deleteByAuthId(authRepository
                 .findByUsername(principal.getName())
