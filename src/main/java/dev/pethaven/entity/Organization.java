@@ -29,7 +29,7 @@ public class Organization {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "auth_id",nullable = false)
     private Auth auth;
 

@@ -8,6 +8,9 @@ import dev.pethaven.enums.PetStatus;
 import dev.pethaven.enums.PetType;
 import dev.pethaven.enums.Role;
 import dev.pethaven.repositories.*;
+import dev.pethaven.services.ChatService;
+import org.junit.Before;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -29,8 +32,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.transaction.Transactional;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -64,6 +70,8 @@ public class ChatControllerTest {
     @Autowired
     ChatRepository chatRepository;
     @Autowired
+    ChatService chatService;
+    @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
     AuthRepository authRepository;
@@ -73,6 +81,8 @@ public class ChatControllerTest {
     PetRepository petRepository;
     @Autowired
     OrganizationRepository organizationRepository;
+    @Autowired
+    MessageRepository messageRepository;
     Organization organization;
     User user;
     @Mock
@@ -90,12 +100,11 @@ public class ChatControllerTest {
         authRepository.deleteAll();
         userRepository.deleteAll();
         organizationRepository.deleteAll();
-        Auth authUser = new Auth(null, "testUser", Role.USER, passwordEncoder.encode("1234"), true);
-        user = new User(null, "Name", "Last name", "71234567890", authUser);
+        Auth authUser = new Auth("testUser", Role.USER, passwordEncoder.encode("1234"), true);
+        user = new User("Name", "Last name", "71234567890", authUser);
         userRepository.save(user);
-        authRepository.save(authUser);
 
-        Auth authOrg = new Auth(null, "testOrg", Role.ORG, passwordEncoder.encode("1234"), true);
+        Auth authOrg = new Auth("testOrg", Role.ORG, passwordEncoder.encode("1234"), true);
         organization = new Organization(null,
                 "NameOrg",
                 "City",
@@ -103,43 +112,62 @@ public class ChatControllerTest {
                 "312132",
                 "71234567890",
                 authOrg);
-        authRepository.save(authOrg);
         organizationRepository.save(organization);
-
     }
 
     @Test
+    @Transactional
     public void testAddMessage() throws Exception {
-        Chat chat = new Chat(null, user, organization);
+        Chat chat = new Chat(user, organization);
         chatRepository.save(chat);
+
         MessageDTO messageDTO = new MessageDTO(
                 "Test message",
                 "19.11.2023 15:00:00",
                 chat.getId(),
                 null,
                 "testUser");
+        Message message = new Message(
+                1L,
+                "Test message",
+                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0),
+                chat);
+        message.setUser(user);
 
-        mockMvc.perform(post("/api/chats/messages")
+        when(principal.getName()).thenReturn("testUser");
+
+        mockMvc.perform(post("/api/chats/messages").principal(principal)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(messageDTO)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.message").value("Message added"));
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
-
+        Assertions.assertEquals(messageRepository.findAll().get(0), message);
     }
 
     @Test
     public void testGetMessages() throws Exception {
-        Chat chat = new Chat(null, user, organization);
+        Chat chat = new Chat(user, organization);
+        chatRepository.save(chat);
+        Message message = new Message(
+                1L,
+                "Test message",
+                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0),
+                chat);
+        message.setUser(user);
+        messageRepository.save(message);
 
-        mockMvc.perform(get("/api/chats/messages/1")
+        when(principal.getName()).thenReturn("testUser");
+
+
+        mockMvc.perform(get("/api/chats/messages/1/?page=0&size=1").principal(principal)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.content[0].message").value("Test message"));
     }
 
     @Test
     public void testGetChats() throws Exception {
-        Chat chat = new Chat(null, user, organization);
+        Chat chat = new Chat(user, organization);
         chatRepository.save(chat);
 
         when(principal.getName()).thenReturn("testUser");
@@ -150,12 +178,23 @@ public class ChatControllerTest {
     }
 
     @Test
+    @Transactional
     public void testCreateChatAndAddRequestMessage() throws Exception {
-        Pet pet = new Pet(null, "testName", PetGender.M, PetType.DOG, LocalDate.now(), "testBreed", null, PetStatus.ACTIVE, organization);
+        Chat chat = new Chat(1L, user, organization);
+        Pet pet = new Pet("testName", PetGender.M, PetType.DOG, LocalDate.now(), "testBreed", null, PetStatus.ACTIVE, organization);
         petRepository.save(pet);
+        Message message = new Message(
+                1L,
+                "Заявка на питомца с кличкой " + pet.getName() + ". Ссылка на питомца: http://localhost:4200/home/" + pet.getId(),
+                LocalDateTime.now(),
+                chat
+        );
         mockMvc.perform(post("/api/chats?orgUsername=testOrg&userUsername=testUser&petId=1")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.message").value("RequestMessage sent"));
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        Assertions.assertEquals(objectMapper.writeValueAsString(chatService.findByUsernames("testOrg", "testUser")),
+                objectMapper.writeValueAsString(chat));
+
+        Assertions.assertEquals(messageRepository.count(),1L );
     }
 }

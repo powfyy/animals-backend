@@ -38,7 +38,6 @@ public class OrganizationService {
     }
 
     public List<OrganizationDtoCityName> getOrganizationCityAndName() {
-        //todo возврат не всех организаций
         return organizationRepository.findAll().stream()
                 .map(el -> organizationMapper.toDtoCityName(el))
                 .collect(Collectors.toList());

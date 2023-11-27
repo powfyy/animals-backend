@@ -85,7 +85,7 @@ public class PetService {
                 //todo сохранение по id, а не по организации JoinColumn нужно менять
                 organizationService.findByUsername(principal.getName())
         );
-
+        petRepository.save(newPet);
         String bucketName = newPet.getId().toString() + "-" + newPet.getTypePet().toString().toLowerCase();
         minioService.createBucket(bucketName);
         if (!newPetInfo.getFiles().isEmpty()) {
@@ -96,7 +96,6 @@ public class PetService {
             });
             petPhotosRepository.saveAll(petPhotosList);
         }
-        petRepository.save(newPet);
         return petMapper.toDTO(newPet);
     }
 

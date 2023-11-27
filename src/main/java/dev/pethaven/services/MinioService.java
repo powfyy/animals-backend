@@ -35,7 +35,7 @@ public class MinioService {
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {
-                String policyJson = new String(Files.readAllBytes(Paths.get("src/main/resources/minio/minioPolicy.json")));
+                String policyJson = new String(Files.readAllBytes(Paths.get("/app/minioPolicy.json")));
                 policyJson = policyJson.replace("bucketName", bucketName);
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
                 minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucketName).config(policyJson).build());

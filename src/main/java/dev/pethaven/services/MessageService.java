@@ -8,6 +8,9 @@ import dev.pethaven.exception.InvalidChatException;
 import dev.pethaven.mappers.MessageMapper;
 import dev.pethaven.repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -36,18 +39,18 @@ public class MessageService {
     @Autowired
     ChatService chatService;
 
-    public List<MessageDTO> getAllMessagesByChat(Long chatId, Principal principal) {
+    public Page<MessageDTO> getMessagesByChat(Long chatId, int page, int size, Principal principal) {
         if (!chatService.isParticipant(chatId, principal.getName())) {
             throw new InvalidChatException("The messages of this chat are not available");
         }
-        List<Message> messages = messageRepository.findAllByChatId(chatId);
-        return messages.stream()
-                .map(el -> messageMapper.toDto(el))
-                .collect(Collectors.toList());
+        return messageRepository.findAllByChatId(chatId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"))).map(messageMapper::toDto);
     }
 
     @Transactional
-    public void addMessage(@Valid MessageDTO messageDTO) {
+    public void addMessage(@Valid MessageDTO messageDTO, Principal principal) {
+        if (!chatService.isParticipant(messageDTO.getChatId(), principal.getName())) {
+            throw new InvalidChatException("The messages of this chat are not available");
+        }
         Message newMessage = new Message(null,
                 messageDTO.getMessage(),
                 LocalDateTime.parse(messageDTO.getDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")),
