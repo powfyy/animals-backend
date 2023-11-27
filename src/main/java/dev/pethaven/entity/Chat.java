@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name="chats")
+@Table(name = "chats")
 @Data
 @NoArgsConstructor
 public class Chat {
@@ -18,11 +18,15 @@ public class Chat {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Organization organization;
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
-    private List <Message> messages;
+    private List<Message> messages;
 
     public Chat(Long id, User user, Organization organization) {
         this.id = id;
         this.user = user;
         this.organization = organization;
+    }
+
+    public Chat(User user, Organization organization) {
+        this(null, user, organization);
     }
 }

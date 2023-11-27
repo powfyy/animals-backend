@@ -18,5 +18,10 @@ public class PetPhotos {
     @Column (nullable = false)
     String photoRef;
     @ManyToOne (fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "pet_id")
     Pet pet;
+
+    public PetPhotos(String photoRef, Pet pet) {
+        this(null, photoRef, pet);
+    }
 }

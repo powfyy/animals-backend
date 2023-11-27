@@ -9,16 +9,18 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table (name="organizations")
-@Getter @Setter
-@AllArgsConstructor @NoArgsConstructor
+@Table(name = "organizations")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Organization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String nameOrganization;
-    @Column (nullable = false)
+    @Column(nullable = false)
     private String city;
     @Column(nullable = false)
     private String passportSeries;
@@ -27,8 +29,8 @@ public class Organization {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @OneToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE}, orphanRemoval = true)
-    @JoinColumn(nullable = false)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    @JoinColumn(name = "auth_id",nullable = false)
     private Auth auth;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
@@ -40,13 +42,28 @@ public class Organization {
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
 
-    public Organization(Long id, String nameOrganization,String city, String passportSeries, String passportNumber, String phoneNumber, Auth auth) {
+    public Organization(Long id,
+                        String nameOrganization,
+                        String city,
+                        String passportSeries,
+                        String passportNumber,
+                        String phoneNumber,
+                        Auth auth) {
         this.id = id;
         this.nameOrganization = nameOrganization;
-        this.city=city;
+        this.city = city;
         this.passportSeries = passportSeries;
         this.passportNumber = passportNumber;
         this.phoneNumber = phoneNumber;
         this.auth = auth;
+    }
+
+    public Organization(String nameOrganization,
+                        String city,
+                        String passportSeries,
+                        String passportNumber,
+                        String phoneNumber,
+                        Auth auth) {
+        this(null, nameOrganization, city, passportSeries, passportNumber, phoneNumber, auth);
     }
 }

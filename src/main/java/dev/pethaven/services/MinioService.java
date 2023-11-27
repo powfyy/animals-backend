@@ -1,6 +1,7 @@
 package dev.pethaven.services;
 
 import dev.pethaven.entity.PetPhotos;
+import dev.pethaven.exception.MyMinioException;
 import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.messages.DeleteObject;
@@ -12,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -32,27 +35,26 @@ public class MinioService {
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {
+                String policyJson = new String(Files.readAllBytes(Paths.get("src/main/resources/minio/minioPolicy.json")));
+                policyJson = policyJson.replace("bucketName", bucketName);
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-                String policyJson = "{ \"Statement\": [ { \"Action\": [ \"s3:GetBucketLocation\", \"s3:ListBucket\" ]," +
-                        " \"Effect\": \"Allow\", \"Principal\": \"*\", \"Resource\": \"arn:aws:s3:::" + bucketName + "\" }," +
-                        " { \"Action\": \"s3:GetObject\", \"Effect\": \"Allow\", \"Principal\": \"*\"," +
-                        " \"Resource\": \"arn:aws:s3:::" + bucketName + "/*\" } ], \"Version\": \"2012-10-17\" }";
                 minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucketName).config(policyJson).build());
                 log.info("bucket successfully created.");
             }
-        } catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+        }
+        catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
             log.error("Error create bucket: {}", e.getMessage());
+            throw new MyMinioException("Error when creating a bucket: "+ e.getMessage());
         }
     }
 
     public void uploadFile(ArrayList<MultipartFile> files, String bucketName) {
         files.forEach(file -> {
-            try {
-                InputStream fileInputStream = file.getInputStream();
-            } catch (Exception e) {
-                log.error("Error: {}", e.getMessage());
-            }
-
+//            try {
+//                InputStream fileInputStream = file.getInputStream();
+//            } catch (Exception e) {
+//                log.error("Error: {}", e.getMessage());
+//            }
             try {
                 minioClient.putObject(PutObjectArgs.builder()
                         .bucket(bucketName)
@@ -62,6 +64,7 @@ public class MinioService {
                         .build());
             } catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
                 log.error("Error upload file: {}", e.getMessage());
+                throw new MyMinioException("Error when uploading a file");
             }
         });
     }
@@ -71,6 +74,7 @@ public class MinioService {
             minioClient.removeBucket(RemoveBucketArgs.builder().bucket(bucketName).build());
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | MinioException e) {
             log.error("Error remove: bucket {}", e.getMessage());
+            throw new MyMinioException("Error when deleting a bucket");
         }
     }
 
@@ -88,6 +92,7 @@ public class MinioService {
             }
         } catch (InvalidKeyException | MinioException | IOException | NoSuchAlgorithmException e) {
             log.error("Error deleting files: {}", e.getMessage());
+            throw new MyMinioException("Error when deleting files");
         }
     }
 
@@ -102,9 +107,11 @@ public class MinioService {
             for (Result<DeleteError> result : results) {
                 DeleteError error = result.get();
                 log.error("Error in deleting object {}; {}", error.objectName(), error.message());
+                throw new MyMinioException("Error when deleting object " + error.objectName());
             }
         } catch (InvalidKeyException | MinioException | IOException | NoSuchAlgorithmException e) {
             log.error("Error deleting files:{} ", e.getMessage());
+            throw new MyMinioException("Error when deleting files");
         }
     }
 }

@@ -1,11 +1,7 @@
 package dev.pethaven.dto;
 
-import dev.pethaven.entity.PetGender;
-import dev.pethaven.entity.PetPhotos;
-import dev.pethaven.entity.PetType;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data

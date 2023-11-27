@@ -2,17 +2,12 @@ package dev.pethaven.controllers;
 
 import dev.pethaven.dto.OrganizationDtoCityName;
 import dev.pethaven.dto.PetDTO;
-import dev.pethaven.exception.NotFoundException;
-import dev.pethaven.mappers.PetMapper;
 import dev.pethaven.dto.FilterFields;
-import dev.pethaven.dto.MessageResponse;
-import dev.pethaven.repositories.PetRepository;
 import dev.pethaven.services.OrganizationService;
 import dev.pethaven.services.PetService;
 import dev.pethaven.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -23,23 +18,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/home")
 public class HomeController {
-
-    @Autowired
-    PetRepository petRepository;
-    @Autowired
-    PetMapper petMapper;
     @Autowired
     PetService petService;
-    @Autowired
-    UserService userService;
-
     @Autowired
     OrganizationService organizationService;
 
     @PostMapping(value = "/pets/{id}")
-    public ResponseEntity<?> requestForPet(@PathVariable("id") Long petId, Principal principal) {
-        userService.requestForPet(principal,petId);
-        return ResponseEntity.ok().body(new MessageResponse("Request sent"));
+    public void requestForPet(@PathVariable("id") Long petId, Principal principal) {
+        petService.requestForPet(principal,petId);
     }
 
     @PostMapping(value = "/pets")
@@ -57,12 +43,11 @@ public class HomeController {
 
     @GetMapping(value = "/pets/{id}")
     public PetDTO getPet(@PathVariable("id") @NotNull(message = "Id cannot be null") Long petId) {
-        return petMapper.toDTO(petRepository.findById(petId)
-                .orElseThrow(()-> new NotFoundException("Pet is not found")));
+        return petService.getPetDTOById(petId);
     }
 
     @GetMapping(value = "/pets/{id}/request")
     public Map<String, Boolean> checkRequest(@PathVariable("id") Long petId, Principal principal) {
-        return userService.checkRequest(principal, petId);
+        return petService.checkRequest(principal, petId);
     }
 }

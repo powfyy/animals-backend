@@ -2,7 +2,7 @@ package dev.pethaven.configs;
 
 import dev.pethaven.auth.AuthEntryPointJwt;
 import dev.pethaven.auth.AuthTokenFilter;
-import dev.pethaven.entity.Role;
+import dev.pethaven.enums.Role;
 import dev.pethaven.mappers.*;
 import dev.pethaven.services.AuthDetailsServiceImpl;
 import org.mapstruct.factory.Mappers;
@@ -89,13 +89,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.cors().disable();
     }
 
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:4200");
+        config.addAllowedOrigin("http://angular-app1:80");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);

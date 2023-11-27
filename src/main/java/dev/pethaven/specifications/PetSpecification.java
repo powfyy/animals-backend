@@ -1,7 +1,10 @@
-package dev.pethaven.services;
+package dev.pethaven.specifications;
 
 import dev.pethaven.entity.*;
 import dev.pethaven.dto.FilterFields;
+import dev.pethaven.enums.PetGender;
+import dev.pethaven.enums.PetStatus;
+import dev.pethaven.enums.PetType;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;

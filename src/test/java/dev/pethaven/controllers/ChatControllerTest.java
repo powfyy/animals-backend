@@ -3,6 +3,10 @@ package dev.pethaven.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.pethaven.dto.MessageDTO;
 import dev.pethaven.entity.*;
+import dev.pethaven.enums.PetGender;
+import dev.pethaven.enums.PetStatus;
+import dev.pethaven.enums.PetType;
+import dev.pethaven.enums.Role;
 import dev.pethaven.repositories.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -120,6 +124,8 @@ public class ChatControllerTest {
                         .content(objectMapper.writeValueAsString(messageDTO)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.message").value("Message added"));
+
+
     }
 
     @Test

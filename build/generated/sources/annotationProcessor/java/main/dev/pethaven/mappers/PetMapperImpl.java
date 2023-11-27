@@ -5,10 +5,10 @@ import dev.pethaven.dto.SavePet;
 import dev.pethaven.entity.Auth;
 import dev.pethaven.entity.Organization;
 import dev.pethaven.entity.Pet;
-import dev.pethaven.entity.PetGender;
 import dev.pethaven.entity.PetPhotos;
-import dev.pethaven.entity.PetStatus;
-import dev.pethaven.entity.PetType;
+import dev.pethaven.enums.PetGender;
+import dev.pethaven.enums.PetStatus;
+import dev.pethaven.enums.PetType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -17,8 +17,8 @@ import javax.annotation.Generated;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-11-23T13:01:12+0300",
-    comments = "version: 1.4.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.4.jar, environment: Java 20.0.1 (Oracle Corporation)"
+    date = "2023-11-27T14:01:52+0300",
+    comments = "version: 1.4.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.1.1.jar, environment: Java 1.8.0_372 (Amazon.com Inc.)"
 )
 public class PetMapperImpl implements PetMapper {
 

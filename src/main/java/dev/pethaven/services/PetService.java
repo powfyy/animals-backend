@@ -1,12 +1,17 @@
 package dev.pethaven.services;
 
 import dev.pethaven.dto.PetDTO;
+import dev.pethaven.dto.UserDTO;
 import dev.pethaven.entity.*;
+import dev.pethaven.enums.PetStatus;
+import dev.pethaven.exception.InvalidPetStatusException;
 import dev.pethaven.exception.NotFoundException;
 import dev.pethaven.mappers.PetMapper;
 import dev.pethaven.dto.FilterFields;
 import dev.pethaven.dto.SavePet;
+import dev.pethaven.mappers.UserMapper;
 import dev.pethaven.repositories.*;
+import dev.pethaven.specifications.PetSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,11 +21,12 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.security.InvalidParameterException;
 import java.security.Principal;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,17 +36,18 @@ public class PetService {
     @Autowired
     PetRepository petRepository;
     @Autowired
-    OrganizationRepository organizationRepository;
+    OrganizationService organizationService;
     @Autowired
-    AuthRepository authRepository;
+    UserService userService;
     @Autowired
     MinioService minioService;
     @Autowired
     PetPhotosRepository petPhotosRepository;
     @Autowired
-    UserRepository userRepository;
-    @Autowired
     PetMapper petMapper;
+
+    @Autowired
+    UserMapper userMapper;
 
     public Page<PetDTO> getFilteredPets(int page, int size, FilterFields filterFields) {
         PetSpecification specification = new PetSpecification(filterFields);
@@ -48,42 +55,53 @@ public class PetService {
     }
 
     public List<PetDTO> getAllPetsCurrentOrganization(Principal principal) {
-        Auth currentAuth = (authRepository
-                .findByUsername(principal.getName()))
-                .orElseThrow(() -> new NotFoundException("Auth not found"));
-        List<Pet> petsArray = petRepository.findByOrganizationId(organizationRepository
-                .findByAuthId(currentAuth.getId())
-                .orElseThrow(() -> new NotFoundException("Organization not found"))
-                .getId());
+        List<Pet> petsArray = petRepository.findByOrganizationUsername(principal.getName());
         return petsArray.stream()
                 .map(el -> petMapper.toDTO(el))
                 .collect(Collectors.toList());
     }
 
+    public PetDTO getPetDTOById(@NotNull Long petId) {
+        return petMapper.toDTO(petRepository.findById(petId)
+                .orElseThrow(() -> new NotFoundException("Pet is not found")));
+    }
+
+    public Pet findById(Long id) {
+        return petRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Pet is not found"));
+    }
+
     @Transactional
-    public void addPet(Principal user, @Valid SavePet newPetInfo) {
+    public PetDTO addPet(Principal principal, @Valid SavePet newPetInfo) {
         Pet tempPet = petMapper.toEntity(newPetInfo);
-        Pet newPet = new Pet(null, tempPet.getName(), tempPet.getGender(), tempPet.getTypePet(),
-                tempPet.getBirthDay(), tempPet.getBreed(), tempPet.getDescription(), PetStatus.ACTIVE,
-                organizationRepository.findByAuthId(authRepository
-                                .findByUsername(user.getName())
-                                .orElseThrow(() -> new NotFoundException("Auth not found"))
-                                .getId())
-                        .orElseThrow(() -> new NotFoundException("Organization not found")));
-        petRepository.save(newPet);
+        Pet newPet = new Pet(
+                tempPet.getName(),
+                tempPet.getGender(),
+                tempPet.getTypePet(),
+                tempPet.getBirthDay(),
+                tempPet.getBreed(),
+                tempPet.getDescription(),
+                PetStatus.ACTIVE,
+                //todo сохранение по id, а не по организации JoinColumn нужно менять
+                organizationService.findByUsername(principal.getName())
+        );
+
         String bucketName = newPet.getId().toString() + "-" + newPet.getTypePet().toString().toLowerCase();
         minioService.createBucket(bucketName);
         if (!newPetInfo.getFiles().isEmpty()) {
             minioService.uploadFile(newPetInfo.getFiles(), bucketName);
+            List<PetPhotos> petPhotosList = new ArrayList<>();
             newPetInfo.getFiles().forEach(file -> {
-                PetPhotos petPhotos = new PetPhotos(null, file.getOriginalFilename(), newPet);
-                petPhotosRepository.save(petPhotos);
+                petPhotosList.add(new PetPhotos(file.getOriginalFilename(), newPet));
             });
+            petPhotosRepository.saveAll(petPhotosList);
         }
+        petRepository.save(newPet);
+        return petMapper.toDTO(newPet);
     }
 
     @Transactional
-    public void updatePet(@NotNull(message = "Id cannot be null") Long petId, @Valid SavePet updatedPet) {
+    public PetDTO updatePet(@NotNull(message = "Id cannot be null") Long petId, @Valid SavePet updatedPet) {
         String bucketName = petId.toString() + "-" + updatedPet.getTypePet().toLowerCase();
         Pet oldPet = petRepository.findById(petId).orElseThrow(() -> new NotFoundException("Pet not found"));
         if (!updatedPet.getDeletedPhotoRefs().isEmpty()) {
@@ -95,17 +113,19 @@ public class PetService {
         if (!updatedPet.getFiles().isEmpty()) {
             minioService.uploadFile(updatedPet.getFiles(), bucketName);
             updatedPet.getFiles().forEach(file -> {
+                //todo
                 PetPhotos petPhotos = new PetPhotos(null, file.getOriginalFilename(), oldPet);
                 petPhotosRepository.save(petPhotos);
             });
         }
         petMapper.updatePet(updatedPet, oldPet);
         petRepository.save(oldPet);
+        return petMapper.toDTO(oldPet);
     }
 
     @Transactional
     public void deletePet(@NotNull(message = "Id cannot be null") Long id) {
-        Pet pet = petRepository.findById(id).orElseThrow(() -> new NotFoundException("Pet not found"));
+        Pet pet = findById(id);
         String bucketName = pet.getId() + "-" + pet.getTypePet().toString().toLowerCase();
         if (!pet.getPetPhotos().isEmpty()) {
             minioService.removeFiles(bucketName, pet.getPetPhotos());
@@ -117,46 +137,53 @@ public class PetService {
 
     @Transactional
     public void adoptPet(@Size(min = 4, message = "username must be minimum 4 chars") String username,
-                         @NotNull(message = "Pet cannot be null") Pet pet) {
-        Auth currentAuth = (authRepository
-                .findByUsername(username))
-                .orElseThrow(() -> new NotFoundException("Auth not found"));
-        User user = userRepository
-                .findByAuthId(currentAuth.getId())
-                .orElseThrow(() -> new NotFoundException("Auth not found"));
+                         @NotNull(message = "Pet cannot be null") Long petId) {
+        Pet pet = findById(petId);
+        if (pet.getStatus() != PetStatus.FREEZE) {
+            throw new InvalidPetStatusException("Incorrect pet status. It is required to be FREEZE");
+        }
+        User user = userService.findByUsername(username);
         user.getPetSet().remove(pet);
         pet.setUser(user);
         pet.getUserSet().clear();
         pet.setStatus(PetStatus.ADOPTED);
-        userRepository.save(user);
         petRepository.save(pet);
     }
 
     @Transactional
     public void deleteRequestUser(@NotNull(message = "Id cannot be null") Long petId,
                                   @Size(min = 4, message = "username must be minimum 4 chars") String username) {
-        User user = userRepository
-                .findByAuthId(authRepository
-                        .findByUsername(username)
-                        .orElseThrow(() -> new NotFoundException("Auth not found"))
-                        .getId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        user.getPetSet().remove(petRepository
-                .findById(petId)
-                .orElseThrow(() -> new NotFoundException("Pet not found")));
-        userRepository.save(user);
+        User user = userService.findByUsername(username);
+        user.getPetSet().remove(findById(petId));
+        userService.save(user);
     }
 
-    public void updateStatusPet(@NotNull(message = "Id cannot be null") Long petId, String newStatus) {
-        Pet updatedPet = petRepository.findById(petId)
-                .orElseThrow(() -> new NotFoundException("Pet not found"));
+    public void updateStatusPet(@NotNull(message = "Id can't be null") Long petId,
+                                @NotEmpty(message = "Status can't be empty") String newStatus) {
+        Pet updatedPet = findById(petId);
         if (updatedPet.getStatus().canTransitionTo(PetStatus.valueOf(newStatus))) {
             updatedPet.setStatus(PetStatus.valueOf(newStatus));
             petRepository.save(updatedPet);
-        }
-        else {
+        } else {
             throw new InvalidParameterException("Invalid status");
         }
     }
 
+    public Map<String, Boolean> checkRequest(Principal principal, @NotNull(message = "Id cannot be null") Long petId) {
+        User user = userService.findByUsername(principal.getName());
+        if (user.getPetSet().contains(findById(petId))) {
+            return Collections.singletonMap("isThereRequest", true);
+        }
+        return Collections.singletonMap("isThereRequest", false);
+    }
+
+    public Set<UserDTO> getUsersRequsts(@NotNull(message = "Id can't be null") Long petId) {
+        return userMapper.toDtoSet(findById(petId).getUserSet());
+    }
+
+    public void requestForPet(Principal principal, @NotNull(message = "Id cannot be null") Long petId) {
+        User currentUser = userService.findByUsername(principal.getName());
+        currentUser.getPetSet().add(findById(petId));
+        userService.save(currentUser);
+    }
 }

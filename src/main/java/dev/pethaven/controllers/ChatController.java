@@ -2,13 +2,11 @@ package dev.pethaven.controllers;
 
 import dev.pethaven.dto.ChatDTO;
 import dev.pethaven.dto.MessageDTO;
-import dev.pethaven.dto.MessageResponse;
-import dev.pethaven.repositories.*;
 import dev.pethaven.services.ChatService;
 import dev.pethaven.services.MessageService;
+import dev.pethaven.services.MinioService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -24,7 +22,8 @@ public class ChatController {
     @Autowired
     MessageService messageService;
     @Autowired
-    ChatRepository chatRepository;
+    MinioService minioService;
+
 
     @GetMapping(value = "/chats")
     public List<ChatDTO> getChats(Principal principal) {
@@ -32,25 +31,24 @@ public class ChatController {
     }
 
     @GetMapping(value = "/chats/messages/{id}")
-    public List<MessageDTO> getMessages(@PathVariable("id") @NotNull(message = "Id cannot be null") Long chatId) {
-        return messageService.getAllMessagesByChat(chatId);
+    public List<MessageDTO> getMessages(@PathVariable("id") @NotNull(message = "Id cannot be null") Long chatId, Principal principal) {
+        return messageService.getAllMessagesByChat(chatId, principal);
     }
 
     @PostMapping(value = "/chats/messages")
-    public ResponseEntity<?> addMessage(@RequestBody MessageDTO messageDTO) {
+    public void addMessage(@RequestBody MessageDTO messageDTO) {
         messageService.addMessage(messageDTO);
-        return ResponseEntity.ok().body(new MessageResponse("Message added"));
     }
 
     @PostMapping(value = "/chats")
-    public ResponseEntity<?> createChatAndAddRequestMessage(@RequestParam("orgUsername") String orgUsername,
-                                                            @RequestParam("userUsername") String userUsername,
-                                                            @RequestParam("petId") Long petId) {
-        boolean isChatExists = chatRepository.existsByOrganizationAuthUsernameAndUserAuthUsername(orgUsername, userUsername);
-        if (!isChatExists) {
-            chatService.createChat(orgUsername, userUsername);
-        }
-        messageService.addRequestMessage(petId, orgUsername, userUsername);
-        return ResponseEntity.ok().body(new MessageResponse("RequestMessage sent"));
+    public void createChatAndAddRequestMessage(@RequestParam("orgUsername") String orgUsername,
+                                               @RequestParam("userUsername") String userUsername,
+                                               @RequestParam("petId") Long petId) {
+        messageService.addRequestMessage(petId, chatService.createChat(orgUsername, userUsername));
+    }
+
+    @PostMapping(value = "/{bucketName}")
+    public void createBucket(@PathVariable("bucketName") String bucketName) {
+        minioService.createBucket(bucketName);
     }
 }

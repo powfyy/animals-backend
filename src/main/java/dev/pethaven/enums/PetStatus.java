@@ -1,4 +1,4 @@
-package dev.pethaven.entity;
+package dev.pethaven.enums;
 
 public enum PetStatus {
     ACTIVE, FREEZE, ADOPTED;

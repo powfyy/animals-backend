@@ -1,4 +1,4 @@
-package dev.pethaven.entity;
+package dev.pethaven.enums;
 
 import lombok.Getter;
 @Getter

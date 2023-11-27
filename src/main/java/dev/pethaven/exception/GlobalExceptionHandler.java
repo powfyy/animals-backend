@@ -1,7 +1,6 @@
 package dev.pethaven.exception;
 
 import dev.pethaven.dto.MessageResponse;
-import io.minio.errors.MinioException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -9,36 +8,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler({IOException.class, NoSuchAlgorithmException.class})
-    public ResponseEntity<String> handleIOException(IOException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("IOException occurred: " + ex.getMessage());
-    }
-
-    @ExceptionHandler(InvalidKeyException.class)
-    public ResponseEntity<String> handleInvalidKeyException(InvalidKeyException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("InvalidKeyException occurred: " + ex.getMessage());
-    }
-
-    @ExceptionHandler(MinioException.class)
-    public ResponseEntity<String> handleMinioException(MinioException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("MinioException occurred: " + ex.getMessage());
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Exception occured: " + ex.getMessage());
-    }
-
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<MessageResponse> handleException(NotFoundException exception) {
         return ResponseEntity
@@ -64,5 +39,33 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new MessageResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<MessageResponse> handleAlreadyExistsException(AlreadyExistsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new MessageResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(MyMinioException.class)
+    public ResponseEntity<MessageResponse> handleMyMinioException(MyMinioException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidPetStatusException.class)
+    public ResponseEntity<MessageResponse> handleMyMinioException(InvalidPetStatusException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidChatException.class)
+    public ResponseEntity<MessageResponse> handleInvalidChatException(InvalidChatException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new MessageResponse(ex.getMessage()));
     }
 }

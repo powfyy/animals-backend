@@ -1,23 +1,25 @@
 package dev.pethaven.services;
 
+import dev.pethaven.dto.SignupUserRequest;
 import dev.pethaven.dto.UserDTO;
 import dev.pethaven.entity.Auth;
 import dev.pethaven.entity.User;
+import dev.pethaven.enums.Role;
+import dev.pethaven.exception.AlreadyExistsException;
 import dev.pethaven.exception.NotFoundException;
 import dev.pethaven.mappers.UserMapper;
-import dev.pethaven.repositories.AuthRepository;
-import dev.pethaven.repositories.PetRepository;
 import dev.pethaven.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @Validated
@@ -25,61 +27,53 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
     @Autowired
-    AuthRepository authRepository;
+    AuthService authService;
     @Autowired
-    PetRepository petRepository;
-
+    PasswordEncoder passwordEncoder;
     @Autowired
     UserMapper userMapper;
 
     public UserDTO getCurrentUser(Principal principal) {
-        Auth currentAuth = (authRepository.findByUsername(principal.getName()))
-                .orElseThrow(() -> new NotFoundException("Auth not found"));
-        return userMapper.toDTO(userRepository
-                .findByAuthId(currentAuth.getId())
-                .orElseThrow(() -> new NotFoundException("User not found")));
+        return userMapper.toDTO(findByUsername(principal.getName()));
     }
 
-    public void updateUser(@Valid  UserDTO updatedUser) {
-        User user = userRepository
-                .findByAuthId(authRepository
-                        .findByUsername(updatedUser.getUsername())
-                        .orElseThrow(() -> new NotFoundException("Auth not found"))
-                        .getId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        userMapper.updateUser(updatedUser, user);
-        userRepository.save(user);
-    }
-
-    @Transactional
-    public void deleteCurrentUser(Principal principal) {
-        userRepository.deleteByAuthId(authRepository
-                .findByUsername(principal.getName())
-                .orElseThrow(() -> new NotFoundException("Auth not found"))
-                .getId());
-    }
-
-    public void requestForPet(Principal principal, @NotNull(message = "Id cannot be null") Long petId) {
-        Auth currentAuth = (authRepository.findByUsername(principal.getName()))
-                                          .orElseThrow(() -> new NotFoundException("Auth not found"));
-        User currentUser = userRepository.findByAuthId(currentAuth.getId())
-                                         .orElseThrow(() -> new NotFoundException("User not found"));
-        currentUser.getPetSet().add(petRepository.findById(petId)
-                                                 .orElseThrow(() -> new NotFoundException("Pet not found")));
-        userRepository.save(currentUser);
-    }
-
-    public Map<String, Boolean> checkRequest(Principal principal, @NotNull(message = "Id cannot be null") Long petId) {
-        User user = userRepository
-                .findByAuthId(authRepository
-                        .findByUsername(principal.getName())
-                        .orElseThrow(() -> new NotFoundException("Auth not found"))
-                        .getId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        if (user.getPetSet().contains(petRepository.findById(petId)
-                .orElseThrow(() -> new NotFoundException("Pet not found")))) {
-            return Collections.singletonMap("isThereRequest", true);
+    public UserDTO createUser(@Valid SignupUserRequest signupUserRequest) {
+        if (authService.existsByUsername(signupUserRequest.getUsername())) {
+            throw new AlreadyExistsException("Username already exists");
         }
-        return Collections.singletonMap("isThereRequest", false);
+        Auth newAuth = new Auth(
+                signupUserRequest.getUsername(),
+                Role.USER,
+                passwordEncoder.encode(signupUserRequest.getPassword()),
+                true
+        );
+        User newUser = new User(
+                signupUserRequest.getName(),
+                signupUserRequest.getLastname(),
+                signupUserRequest.getPhoneNumber(),
+                newAuth
+        );
+        save(newUser);
+        return userMapper.toDTO(newUser);
+    }
+
+    public UserDTO updateUser(@Valid UserDTO updatedUser) {
+        User user = findByUsername(updatedUser.getUsername());
+        userMapper.updateUser(updatedUser, user);
+        save(user);
+        return userMapper.toDTO(user);
+    }
+
+    public void deleteCurrentUser(Principal principal) {
+        userRepository.deleteByUsername(principal.getName());
+    }
+
+    public User findByUsername(String username){
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User is not found"));
+    }
+
+    public void save(User user) {
+        userRepository.save(user);
     }
 }

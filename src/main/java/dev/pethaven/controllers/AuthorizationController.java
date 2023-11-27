@@ -4,12 +4,14 @@ import dev.pethaven.auth.JwtUtils;
 import dev.pethaven.dto.*;
 import dev.pethaven.entity.Auth;
 import dev.pethaven.entity.Organization;
-import dev.pethaven.entity.Role;
+import dev.pethaven.enums.Role;
 import dev.pethaven.entity.User;
 import dev.pethaven.repositories.AuthRepository;
 import dev.pethaven.repositories.OrganizationRepository;
 import dev.pethaven.repositories.UserRepository;
 import dev.pethaven.services.AuthDetailsImpl;
+import dev.pethaven.services.OrganizationService;
+import dev.pethaven.services.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,24 +30,21 @@ import javax.validation.Valid;
 
 
 @RestController
-@RequestMapping ("/api")
+@RequestMapping("/api")
 @Slf4j
 public class AuthorizationController {
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
-    AuthRepository authRepository;
+    UserService userService;
     @Autowired
-    UserRepository userRepository;
-    @Autowired
-    OrganizationRepository organizationRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    OrganizationService organizationService;
+
     @Autowired
     JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public JwtResponse authUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
@@ -53,58 +52,27 @@ public class AuthorizationController {
                         loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt =jwtUtils.generateJwtToken(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
 
         AuthDetailsImpl authDetails = (AuthDetailsImpl) authentication.getPrincipal();
         String role = authDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .findFirst()
-                .orElseGet(() -> "USER");;
+                .orElseGet(() -> "USER");
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                authDetails.getId(),
-                authDetails.getUsername(), role));
+        return new JwtResponse(jwt, authDetails.getId(), authDetails.getUsername(), role);
     }
 
     @Transactional
     @PostMapping("/signup/user")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupUserRequest signupUserRequest) {
-
-        if (authRepository.existsByUsername(signupUserRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is exist"));
-        }
-        if (signupUserRequest.getUsername() == null || signupUserRequest.getUsername() == ""){
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username cannot be empty"));
-        }
-        Auth newAuth = new Auth (null, signupUserRequest.getUsername(), Role.USER,passwordEncoder.encode(signupUserRequest.getPassword()),true );
-        User newUser = new User(null, signupUserRequest.getName(),signupUserRequest.getLastname(), signupUserRequest.getPhoneNumber(), newAuth);
-        authRepository.save(newAuth);
-        userRepository.save(newUser);
-        return ResponseEntity.ok(new MessageResponse("User CREATED"));
+    public UserDTO registerUser(@Valid @RequestBody SignupUserRequest signupUserRequest) {
+        return userService.createUser(signupUserRequest);
     }
 
     @Transactional
-    @PostMapping ("/signup/organization")
-    public ResponseEntity <?> registerOrganization(@Valid @RequestBody SignupOrganizationRequest signupOrganizationRequest){
-        if (authRepository.existsByUsername(signupOrganizationRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is exist"));
-        }
-        if (signupOrganizationRequest.getUsername() == null || signupOrganizationRequest.getUsername() == ""){
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username cannot be empty"));
-        }
-        Auth newAuth = new Auth(null, signupOrganizationRequest.getUsername(), Role.ORG, passwordEncoder.encode(signupOrganizationRequest.getPassword()),true);
-        Organization newOrganization = new Organization(null, signupOrganizationRequest.getNameOrganization(), signupOrganizationRequest.getCity(), signupOrganizationRequest.getPassportNumber(), signupOrganizationRequest.getPassportSeries(), signupOrganizationRequest.getPhoneNumber(), newAuth);
-        authRepository.save(newAuth);
-        organizationRepository.save(newOrganization);
-        return ResponseEntity.ok(new MessageResponse("Organization CREATED"));
+    @PostMapping("/signup/organization")
+    public OrganizationDTO registerOrganization(@Valid @RequestBody SignupOrganizationRequest signupOrganizationRequest) {
+        return organizationService.createOrganization(signupOrganizationRequest);
     }
 
 }

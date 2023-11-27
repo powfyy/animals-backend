@@ -17,7 +17,7 @@ public class Message {
     private Long id;
     @Column(nullable = false)
     private String message;
-    @Column (nullable = false)
+    @Column(nullable = false)
     private LocalDateTime date;
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Chat chat;
@@ -31,5 +31,9 @@ public class Message {
         this.message = message;
         this.date = date;
         this.chat = chat;
+    }
+
+    public Message(String message, LocalDateTime date, Chat chat) {
+        this(null, message, date, chat);
     }
 }

@@ -1,7 +1,7 @@
 package dev.pethaven.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.pethaven.entity.Role;
+import dev.pethaven.enums.Role;
 import dev.pethaven.entity.Auth;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
