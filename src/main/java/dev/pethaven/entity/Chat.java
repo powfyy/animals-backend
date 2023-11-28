@@ -22,13 +22,4 @@ public class Chat {
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
     private List<Message> messages;
 
-    public Chat(Long id, User user, Organization organization) {
-        this.id = id;
-        this.user = user;
-        this.organization = organization;
-    }
-
-    public Chat(User user, Organization organization) {
-        this(null, user, organization);
-    }
 }

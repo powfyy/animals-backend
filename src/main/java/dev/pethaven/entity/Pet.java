@@ -62,8 +62,7 @@ public class Pet {
                LocalDate birthDay,
                String breed,
                String description,
-               PetStatus status,
-               Organization organization) {
+               PetStatus status) {
         this.id = id;
         this.name = name;
         this.gender = gender;
@@ -76,7 +75,6 @@ public class Pet {
         }
         this.description = description;
         this.status = status;
-        this.organization = organization;
     }
 
     public Pet(String name,
@@ -85,8 +83,7 @@ public class Pet {
                LocalDate birthDay,
                String breed,
                String description,
-               PetStatus status,
-               Organization organization) {
+               PetStatus status) {
         if (breed != null) {
             this.breed = breed.toLowerCase();
         } else {
@@ -99,46 +96,6 @@ public class Pet {
         this.birthDay = birthDay;
         this.description = description;
         this.status = status;
-        this.organization = organization;
     }
 
-    public Pet(Long id, String name, PetGender gender, PetType typePet, LocalDate birthDay,
-               String breed, String description, PetStatus status, User user) {
-        this.id = id;
-        this.name = name;
-        this.gender = gender;
-        this.typePet = typePet;
-        this.birthDay = birthDay;
-        if (breed != null) {
-            this.breed = breed.toLowerCase();
-        } else {
-            this.breed = null;
-        }
-        this.description = description;
-        this.status = status;
-        this.user = user;
-    }
-
-    public Pet(String name,
-               PetGender gender,
-               PetType typePet,
-               LocalDate birthDay,
-               String breed,
-               String description,
-               PetStatus status,
-               User user) {
-        if (breed != null) {
-            this.breed = breed.toLowerCase();
-        } else {
-            this.breed = null;
-        }
-        this.id = null;
-        this.name = name;
-        this.gender = gender;
-        this.typePet = typePet;
-        this.birthDay = birthDay;
-        this.description = description;
-        this.status = status;
-        this.user = user;
-    }
 }

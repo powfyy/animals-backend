@@ -9,19 +9,26 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "pet_photos")
-@Getter @Setter
-@AllArgsConstructor @NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class PetPhotos {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column (nullable = false)
+    @Column(nullable = false)
     String photoRef;
-    @ManyToOne (fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "pet_id")
     Pet pet;
 
-    public PetPhotos(String photoRef, Pet pet) {
-        this(null, photoRef, pet);
+    public PetPhotos(Long id, String photoRef) {
+        this.id = id;
+        this.photoRef = photoRef;
+    }
+
+    public PetPhotos(String photoRef) {
+        this(null, photoRef);
     }
 }

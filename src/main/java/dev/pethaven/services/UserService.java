@@ -50,9 +50,9 @@ public class UserService {
         User newUser = new User(
                 signupUserRequest.getName(),
                 signupUserRequest.getLastname(),
-                signupUserRequest.getPhoneNumber(),
-                newAuth
+                signupUserRequest.getPhoneNumber()
         );
+        newUser.setAuth(newAuth);
         save(newUser);
         return userMapper.toDTO(newUser);
     }

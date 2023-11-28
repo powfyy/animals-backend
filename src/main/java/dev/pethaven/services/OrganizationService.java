@@ -58,9 +58,9 @@ public class OrganizationService {
                 signupOrganizationRequest.getCity(),
                 signupOrganizationRequest.getPassportNumber(),
                 signupOrganizationRequest.getPassportSeries(),
-                signupOrganizationRequest.getPhoneNumber(),
-                newAuth
+                signupOrganizationRequest.getPhoneNumber()
         );
+        newOrganization.setAuth(newAuth);
         organizationRepository.save(newOrganization);
         return organizationMapper.toDTO(newOrganization);
     }

@@ -47,23 +47,20 @@ public class Organization {
                         String city,
                         String passportSeries,
                         String passportNumber,
-                        String phoneNumber,
-                        Auth auth) {
+                        String phoneNumber) {
         this.id = id;
         this.nameOrganization = nameOrganization;
         this.city = city;
         this.passportSeries = passportSeries;
         this.passportNumber = passportNumber;
         this.phoneNumber = phoneNumber;
-        this.auth = auth;
     }
 
     public Organization(String nameOrganization,
                         String city,
                         String passportSeries,
                         String passportNumber,
-                        String phoneNumber,
-                        Auth auth) {
-        this(null, nameOrganization, city, passportSeries, passportNumber, phoneNumber, auth);
+                        String phoneNumber) {
+        this(null, nameOrganization, city, passportSeries, passportNumber, phoneNumber);
     }
 }

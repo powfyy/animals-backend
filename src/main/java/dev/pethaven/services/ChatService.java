@@ -36,10 +36,9 @@ public class ChatService {
     public Chat createChat(@NotNull(message = "Organization's username can't be null") String organizationUsername,
                            @NotNull(message = "User's username can't be null") String userUsername) {
         return chatRepository.findChatByUsernames(organizationUsername, userUsername).orElseGet(() -> {
-            Chat chat = new Chat(
-                    userService.findByUsername(userUsername),
-                    organizationService.findByUsername(organizationUsername)
-            );
+            Chat chat = new Chat();
+            chat.setUser(userService.findByUsername(userUsername));
+            chat.setOrganization(organizationService.findByUsername(organizationUsername));
             chatRepository.save(chat);
             return chat;
         });

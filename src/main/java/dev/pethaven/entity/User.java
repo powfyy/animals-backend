@@ -39,15 +39,14 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
 
-    public User(Long id, String name, String lastname, String phoneNumber, Auth auth) {
+    public User(Long id, String name, String lastname, String phoneNumber) {
         this.id = id;
         this.name = name;
         this.lastname = lastname;
         this.phoneNumber = phoneNumber;
-        this.auth = auth;
     }
 
-    public User (String name, String lastname, String phoneNumber, Auth auth) {
-        this(null, name, lastname, phoneNumber, auth);
+    public User (String name, String lastname, String phoneNumber) {
+        this(null, name, lastname, phoneNumber);
     }
 }

@@ -34,14 +34,13 @@ public class Message {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Message(Long id, String message, LocalDateTime date, Chat chat) {
+    public Message(Long id, String message, LocalDateTime date) {
         this.id = id;
         this.message = message;
         this.date = date;
-        this.chat = chat;
     }
 
-    public Message(String message, LocalDateTime date, Chat chat) {
-        this(null, message, date, chat);
+    public Message(String message, LocalDateTime date) {
+        this(null, message, date);
     }
 }

@@ -9,7 +9,6 @@ import dev.pethaven.enums.PetType;
 import dev.pethaven.enums.Role;
 import dev.pethaven.repositories.*;
 import dev.pethaven.services.ChatService;
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,7 +100,8 @@ public class ChatControllerTest {
         userRepository.deleteAll();
         organizationRepository.deleteAll();
         Auth authUser = new Auth("testUser", Role.USER, passwordEncoder.encode("1234"), true);
-        user = new User("Name", "Last name", "71234567890", authUser);
+        user = new User("Name", "Last name", "71234567890");
+        user.setAuth(authUser);
         userRepository.save(user);
 
         Auth authOrg = new Auth("testOrg", Role.ORG, passwordEncoder.encode("1234"), true);
@@ -110,16 +110,15 @@ public class ChatControllerTest {
                 "City",
                 "0000",
                 "312132",
-                "71234567890",
-                authOrg);
+                "71234567890");
+        organization.setAuth(authOrg);
         organizationRepository.save(organization);
     }
 
     @Test
     @Transactional
     public void testAddMessage() throws Exception {
-        Chat chat = new Chat(user, organization);
-        chatRepository.save(chat);
+        Chat chat = chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
 
         MessageDTO messageDTO = new MessageDTO(
                 "Test message",
@@ -130,8 +129,8 @@ public class ChatControllerTest {
         Message message = new Message(
                 1L,
                 "Test message",
-                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0),
-                chat);
+                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0));
+        message.setChat(chat);
         message.setUser(user);
 
         when(principal.getName()).thenReturn("testUser");
@@ -146,13 +145,12 @@ public class ChatControllerTest {
 
     @Test
     public void testGetMessages() throws Exception {
-        Chat chat = new Chat(user, organization);
-        chatRepository.save(chat);
+        Chat chat = chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
         Message message = new Message(
                 1L,
                 "Test message",
-                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0),
-                chat);
+                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0));
+        message.setChat(chat);
         message.setUser(user);
         messageRepository.save(message);
 
@@ -167,8 +165,7 @@ public class ChatControllerTest {
 
     @Test
     public void testGetChats() throws Exception {
-        Chat chat = new Chat(user, organization);
-        chatRepository.save(chat);
+        Chat chat = chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
 
         when(principal.getName()).thenReturn("testUser");
 
@@ -180,15 +177,14 @@ public class ChatControllerTest {
     @Test
     @Transactional
     public void testCreateChatAndAddRequestMessage() throws Exception {
-        Chat chat = new Chat(1L, user, organization);
-        Pet pet = new Pet("testName", PetGender.M, PetType.DOG, LocalDate.now(), "testBreed", null, PetStatus.ACTIVE, organization);
+        Chat chat = new Chat();
+        chat.setId(1L);
+        chat.setOrganization(organization);
+        chat.setUser(user);
+        Pet pet = new Pet("testName", PetGender.M, PetType.DOG, LocalDate.now(), "testBreed", null, PetStatus.ACTIVE);
+        pet.setOrganization(organization);
         petRepository.save(pet);
-        Message message = new Message(
-                1L,
-                "Заявка на питомца с кличкой " + pet.getName() + ". Ссылка на питомца: http://localhost:4200/home/" + pet.getId(),
-                LocalDateTime.now(),
-                chat
-        );
+
         mockMvc.perform(post("/api/chats?orgUsername=testOrg&userUsername=testUser&petId=1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());

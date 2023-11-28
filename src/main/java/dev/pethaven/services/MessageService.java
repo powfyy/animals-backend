@@ -53,8 +53,8 @@ public class MessageService {
         }
         Message newMessage = new Message(null,
                 messageDTO.getMessage(),
-                LocalDateTime.parse(messageDTO.getDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")),
-                chatService.findById(messageDTO.getChatId()));
+                LocalDateTime.parse(messageDTO.getDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
+        newMessage.setChat(chatService.findById(messageDTO.getChatId()));
         if (messageDTO.getUserUsername() != null) {
             newMessage.setUser(userService.findByUsername(messageDTO.getUserUsername()));
         } else {
@@ -69,9 +69,9 @@ public class MessageService {
         Pet pet = petService.findById(petId);
         Message message = new Message(
                 "Заявка на питомца с кличкой " + pet.getName() + ". Ссылка на питомца: http://localhost:4200/home/" + pet.getId(),
-                LocalDateTime.now(),
-                chat
+                LocalDateTime.now()
         );
+        message.setChat(chat);
         message.setUser(chat.getUser());
         messageRepository.save(message);
     }

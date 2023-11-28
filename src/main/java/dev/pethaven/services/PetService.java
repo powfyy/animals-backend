@@ -81,10 +81,8 @@ public class PetService {
                 tempPet.getBirthDay(),
                 tempPet.getBreed(),
                 tempPet.getDescription(),
-                PetStatus.ACTIVE,
-                //todo сохранение по id, а не по организации JoinColumn нужно менять
-                organizationService.findByUsername(principal.getName())
-        );
+                PetStatus.ACTIVE);
+        newPet.setOrganization(organizationService.findByUsername(principal.getName()));
         petRepository.save(newPet);
         String bucketName = newPet.getId().toString() + "-" + newPet.getTypePet().toString().toLowerCase();
         minioService.createBucket(bucketName);
@@ -92,7 +90,9 @@ public class PetService {
             minioService.uploadFile(newPetInfo.getFiles(), bucketName);
             List<PetPhotos> petPhotosList = new ArrayList<>();
             newPetInfo.getFiles().forEach(file -> {
-                petPhotosList.add(new PetPhotos(file.getOriginalFilename(), newPet));
+                PetPhotos petPhotos = new PetPhotos(file.getOriginalFilename());
+                petPhotos.setPet(newPet);
+                petPhotosList.add(petPhotos);
             });
             petPhotosRepository.saveAll(petPhotosList);
         }
