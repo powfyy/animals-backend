@@ -1,14 +1,10 @@
 package dev.pethaven.services;
 
 import dev.pethaven.dto.ChatDTO;
-import dev.pethaven.entity.*;
-import dev.pethaven.enums.Role;
+import dev.pethaven.entity.Chat;
 import dev.pethaven.exception.NotFoundException;
 import dev.pethaven.mappers.ChatMapper;
-import dev.pethaven.repositories.AuthRepository;
 import dev.pethaven.repositories.ChatRepository;
-import dev.pethaven.repositories.OrganizationRepository;
-import dev.pethaven.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +14,6 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
-import java.util.List;
 
 @Service
 @Validated
