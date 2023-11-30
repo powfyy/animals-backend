@@ -10,6 +10,9 @@ import dev.pethaven.repositories.ChatRepository;
 import dev.pethaven.repositories.OrganizationRepository;
 import dev.pethaven.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -29,8 +32,11 @@ public class ChatService {
     @Autowired
     ChatMapper chatMapper;
 
-    public List<ChatDTO> getAllChats(Principal principal) {
-        return chatMapper.toDtoList(chatRepository.findAllByUsername(principal.getName()));
+    public Page<ChatDTO> getChats(Principal principal, int page, int size) {
+        return chatRepository.findChatsByUsername(
+                        principal.getName(),
+                        PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateLastMessage")))
+                .map(chatMapper::toDTO);
     }
 
     public Chat createChat(@NotNull(message = "Organization's username can't be null") String organizationUsername,

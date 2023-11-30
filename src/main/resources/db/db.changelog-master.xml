@@ -15,4 +15,5 @@
     <include file="changelog/010_add_not_null_constraint.xml" relativeToChangelogFile="true"/>
     <include file="changelog/011_create_table_chats.xml" relativeToChangelogFile="true"/>
     <include file="changelog/012_create_table_messages.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/013_add_date_to_chats.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

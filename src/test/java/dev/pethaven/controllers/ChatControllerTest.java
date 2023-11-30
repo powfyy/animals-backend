@@ -7,6 +7,7 @@ import dev.pethaven.enums.PetGender;
 import dev.pethaven.enums.PetStatus;
 import dev.pethaven.enums.PetType;
 import dev.pethaven.enums.Role;
+import dev.pethaven.mappers.MessageMapper;
 import dev.pethaven.repositories.*;
 import dev.pethaven.services.ChatService;
 import org.junit.jupiter.api.Assertions;
@@ -67,8 +68,6 @@ public class ChatControllerTest {
     }
 
     @Autowired
-    ChatRepository chatRepository;
-    @Autowired
     ChatService chatService;
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -82,6 +81,8 @@ public class ChatControllerTest {
     OrganizationRepository organizationRepository;
     @Autowired
     MessageRepository messageRepository;
+    @Autowired
+    MessageMapper messageMapper;
     Organization organization;
     User user;
     @Mock
@@ -119,20 +120,14 @@ public class ChatControllerTest {
     @Transactional
     public void testAddMessage() throws Exception {
         Chat chat = chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
-
-        MessageDTO messageDTO = new MessageDTO(
-                "Test message",
-                "19.11.2023 15:00:00",
-                chat.getId(),
-                null,
-                "testUser");
         Message message = new Message(
                 1L,
                 "Test message",
                 LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0));
         message.setChat(chat);
         message.setUser(user);
-
+        MessageDTO messageDTO = messageMapper.toDto(message);
+        messageDTO.setDate("19.11.2023 15:00:00");
         when(principal.getName()).thenReturn("testUser");
 
         mockMvc.perform(post("/api/chats/messages").principal(principal)
@@ -165,7 +160,7 @@ public class ChatControllerTest {
 
     @Test
     public void testGetChats() throws Exception {
-        Chat chat = chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
+        chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
 
         when(principal.getName()).thenReturn("testUser");
 
@@ -191,6 +186,6 @@ public class ChatControllerTest {
         Assertions.assertEquals(objectMapper.writeValueAsString(chatService.findByUsernames("testOrg", "testUser")),
                 objectMapper.writeValueAsString(chat));
 
-        Assertions.assertEquals(messageRepository.count(),1L );
+        Assertions.assertEquals(messageRepository.count(), 1L);
     }
 }

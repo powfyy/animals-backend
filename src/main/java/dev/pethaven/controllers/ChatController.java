@@ -22,13 +22,13 @@ public class ChatController {
     ChatService chatService;
     @Autowired
     MessageService messageService;
-    @Autowired
-    MinioService minioService;
 
 
     @GetMapping(value = "/chats")
-    public List<ChatDTO> getChats(Principal principal) {
-        return chatService.getAllChats(principal);
+    public Page<ChatDTO> getChats(Principal principal,
+                                  @RequestParam(required = false, defaultValue = "0") int page,
+                                  @RequestParam(required = false, defaultValue = "35") int size) {
+        return chatService.getChats(principal, page, size);
     }
 
     @GetMapping(value = "/chats/messages/{id}/")

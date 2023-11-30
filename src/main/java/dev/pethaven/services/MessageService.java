@@ -51,15 +51,17 @@ public class MessageService {
         if (!chatService.isParticipant(messageDTO.getChatId(), principal.getName())) {
             throw new InvalidChatException("The messages of this chat are not available");
         }
+        Chat chat = chatService.findById(messageDTO.getChatId());
         Message newMessage = new Message(null,
                 messageDTO.getMessage(),
                 LocalDateTime.parse(messageDTO.getDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
-        newMessage.setChat(chatService.findById(messageDTO.getChatId()));
+        newMessage.setChat(chat);
         if (messageDTO.getUserUsername() != null) {
             newMessage.setUser(userService.findByUsername(messageDTO.getUserUsername()));
         } else {
             newMessage.setOrganization(organizationService.findByUsername(messageDTO.getOrganizationUsername()));
         }
+        chat.setDateLastMessage(newMessage.getDate());
         messageRepository.save(newMessage);
     }
 
@@ -73,6 +75,7 @@ public class MessageService {
         );
         message.setChat(chat);
         message.setUser(chat.getUser());
+        chat.setDateLastMessage(message.getDate());
         messageRepository.save(message);
     }
 }

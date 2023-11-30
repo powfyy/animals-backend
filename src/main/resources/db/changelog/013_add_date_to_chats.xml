@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+    <changeSet id="013_add_date_to_chats" author="d.srb@yandex.ru">
+        <addColumn tableName="chats">
+            <column name="date_last_message" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="upload_default_value" author="d.srb@yandex.ru">
+        <sql>
+            UPDATE chats SET date_last_message = '2023-11-27 18:16:30' WHERE date_last_message IS NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="add_not_null_constraint" author="d.srb@yandex.ru">
+        <addNotNullConstraint tableName="chats" columnName="date_last_message" columnDataType="TIMESTAMP"/>
+    </changeSet>
+</databaseChangeLog>
