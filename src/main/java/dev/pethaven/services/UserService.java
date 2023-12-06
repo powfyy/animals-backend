@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
@@ -33,28 +34,28 @@ public class UserService {
     @Autowired
     UserMapper userMapper;
 
-    public UserDTO getCurrentUser(Principal principal) {
-        return userMapper.toDTO(findByUsername(principal.getName()));
+    public UserDTO getCurrentUser(String username) {
+        return userMapper.toDTO(findByUsername(username));
     }
 
     public UserDTO createUser(@Valid SignupUserRequest signupUserRequest) {
         if (authService.existsByUsername(signupUserRequest.getUsername())) {
             throw new AlreadyExistsException("Username already exists");
         }
-        Auth newAuth = new Auth(
+        Auth auth = new Auth(
                 signupUserRequest.getUsername(),
                 Role.USER,
                 passwordEncoder.encode(signupUserRequest.getPassword()),
                 true
         );
-        User newUser = new User(
+        User user = new User(
                 signupUserRequest.getName(),
                 signupUserRequest.getLastname(),
                 signupUserRequest.getPhoneNumber()
         );
-        newUser.setAuth(newAuth);
-        save(newUser);
-        return userMapper.toDTO(newUser);
+        user.setAuth(auth);
+        save(user);
+        return userMapper.toDTO(user);
     }
 
     public UserDTO updateUser(@Valid UserDTO updatedUser) {
@@ -64,8 +65,9 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
-    public void deleteCurrentUser(Principal principal) {
-        userRepository.deleteByUsername(principal.getName());
+    @Transactional
+    public void deleteCurrentUser(String username) {
+        userRepository.deleteById(findByUsername(username).getId());
     }
 
     public User findByUsername(String username){

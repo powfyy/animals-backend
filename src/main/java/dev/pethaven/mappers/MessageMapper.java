@@ -7,7 +7,6 @@ import org.mapstruct.Mapping;
 
 @Mapper
 public interface MessageMapper {
-    @Mapping(source = "chat.id", target = "chatId")
     @Mapping(source = "organization.auth.username", target = "organizationUsername")
     @Mapping(source = "user.auth.username", target = "userUsername")
     MessageDTO toDto (Message message);

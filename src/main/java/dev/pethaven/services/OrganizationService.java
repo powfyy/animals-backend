@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
@@ -33,8 +34,8 @@ public class OrganizationService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    public OrganizationDTO getCurrentOrganization(Principal principal) {
-        return organizationMapper.toDTO(findByUsername(principal.getName()));
+    public OrganizationDTO getCurrentOrganization(String username) {
+        return organizationMapper.toDTO(findByUsername(username));
     }
 
     public List<OrganizationDtoCityName> getOrganizationCityAndName() {
@@ -47,22 +48,22 @@ public class OrganizationService {
         if (authService.existsByUsername(signupOrganizationRequest.getUsername())) {
             throw new AlreadyExistsException("Username already exists");
         }
-        Auth newAuth = new Auth(
+        Auth auth = new Auth(
                 signupOrganizationRequest.getUsername(),
                 Role.ORG,
                 passwordEncoder.encode(signupOrganizationRequest.getPassword()),
                 true
         );
-        Organization newOrganization = new Organization(
+        Organization organization = new Organization(
                 signupOrganizationRequest.getNameOrganization(),
                 signupOrganizationRequest.getCity(),
                 signupOrganizationRequest.getPassportNumber(),
                 signupOrganizationRequest.getPassportSeries(),
                 signupOrganizationRequest.getPhoneNumber()
         );
-        newOrganization.setAuth(newAuth);
-        organizationRepository.save(newOrganization);
-        return organizationMapper.toDTO(newOrganization);
+        organization.setAuth(auth);
+        organizationRepository.save(organization);
+        return organizationMapper.toDTO(organization);
     }
     public OrganizationDTO updateOrganization(@Valid OrganizationDTO updatedOrganization) {
         Organization organization = findByUsername(updatedOrganization.getUsername());
@@ -71,8 +72,9 @@ public class OrganizationService {
         return organizationMapper.toDTO(organization);
     }
 
-    public void deleteCurrentOrganization(Principal principal) {
-        organizationRepository.deleteByUsername(principal.getName());
+    @Transactional
+    public void deleteCurrentOrganization(String username) {
+        organizationRepository.deleteById(findByUsername(username).getId());
     }
 
     public Organization findByUsername(String username){

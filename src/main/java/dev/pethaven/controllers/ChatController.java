@@ -25,10 +25,10 @@ public class ChatController {
 
 
     @GetMapping(value = "/chats")
-    public Page<ChatDTO> getChats(Principal principal,
-                                  @RequestParam(required = false, defaultValue = "0") int page,
-                                  @RequestParam(required = false, defaultValue = "35") int size) {
-        return chatService.getChats(principal, page, size);
+    public Page<ChatDTO> getChats(@RequestParam(required = false, defaultValue = "0") int page,
+                                  @RequestParam(required = false, defaultValue = "35") int size,
+                                  Principal principal) {
+        return chatService.getChats(page, size, principal.getName());
     }
 
     @GetMapping(value = "/chats/messages/{id}/")
@@ -36,12 +36,12 @@ public class ChatController {
                                         @RequestParam(required = false, defaultValue = "0") int page,
                                         @RequestParam(required = false, defaultValue = "35") int size,
                                         Principal principal) {
-        return messageService.getMessagesByChat(chatId, page, size, principal);
+        return messageService.getMessagesByChat(chatId, page, size, principal.getName());
     }
 
     @PostMapping(value = "/chats/messages")
     public void addMessage(@RequestBody MessageDTO messageDTO, Principal principal) {
-        messageService.addMessage(messageDTO, principal);
+        messageService.addMessage(messageDTO, principal.getName());
     }
 
     @PostMapping(value = "/chats")

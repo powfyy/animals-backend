@@ -19,16 +19,25 @@ public class PetPhotos {
     private Long id;
     @Column(nullable = false)
     String photoRef;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @JoinColumn(name = "pet_id")
-    Pet pet;
 
-    public PetPhotos(Long id, String photoRef) {
+    @JoinColumn(name = "pet_id", nullable = false, insertable = false, updatable = false)
+    @ManyToOne(targetEntity = Pet.class, fetch = FetchType.LAZY)
+    private Pet pet;
+    @Column(name = "pet_id")
+    private Long petId;
+
+    public PetPhotos(Long id, String photoRef, Long petId) {
         this.id = id;
         this.photoRef = photoRef;
+        this.petId = petId;
     }
 
-    public PetPhotos(String photoRef) {
-        this(null, photoRef);
+    public PetPhotos(String photoRef, Long petId) {
+        this(null, photoRef, petId);
+    }
+
+    public void setPet(Pet pet) {
+        setPetId(pet.getId());
+        this.pet = pet;
     }
 }

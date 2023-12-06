@@ -29,8 +29,8 @@ public class Organization {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "auth_id",nullable = false)
+    @JoinColumn(name = "auth_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Auth auth;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)

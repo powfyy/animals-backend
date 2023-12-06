@@ -23,8 +23,8 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @OneToOne (cascade = CascadeType.ALL)
     @JoinColumn(name = "auth_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Auth auth;
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
@@ -49,4 +49,5 @@ public class User {
     public User (String name, String lastname, String phoneNumber) {
         this(null, name, lastname, phoneNumber);
     }
+
 }

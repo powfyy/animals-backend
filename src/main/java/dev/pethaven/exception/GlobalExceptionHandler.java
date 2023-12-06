@@ -48,8 +48,8 @@ public class GlobalExceptionHandler {
                 .body(new MessageResponse(ex.getMessage()));
     }
 
-    @ExceptionHandler(MyMinioException.class)
-    public ResponseEntity<MessageResponse> handleMyMinioException(MyMinioException ex) {
+    @ExceptionHandler(UntraceableMinioException.class)
+    public ResponseEntity<MessageResponse> handleMyMinioException(UntraceableMinioException ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new MessageResponse(ex.getMessage()));

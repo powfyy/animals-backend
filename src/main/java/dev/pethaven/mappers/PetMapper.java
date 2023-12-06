@@ -16,21 +16,21 @@ public interface PetMapper {
     @Mapping(source = "organization.nameOrganization", target = "nameOrganization")
     @Mapping(source = "organization.auth.username", target = "usernameOrganization")
     PetDTO toDTO(Pet pet);
-    @Mapping(target = "organization",ignore = true)
-    @Mapping(target = "user",ignore = true)
-    @Mapping(target = "petPhotos",ignore = true)
-    @Mapping(target = "userSet",ignore = true)
-    Pet toEntity(PetDTO petDTO);
+
     @Mapping(target = "id",ignore = true)
     @Mapping(target = "status",ignore = true)
     @Mapping(target = "organization",ignore = true)
+    @Mapping(target = "organizationId",ignore = true)
     @Mapping(target = "user",ignore = true)
+    @Mapping(target = "userId",ignore = true)
     @Mapping(target = "petPhotos",ignore = true)
     @Mapping(target = "userSet",ignore = true)
     Pet toEntity (SavePet newPetInfo);
 
     @Mapping(target = "organization", ignore = true)
-    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "organizationId",ignore = true)
+    @Mapping(target = "user",ignore = true)
+    @Mapping(target = "userId",ignore = true)
     @Mapping(target = "userSet", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)

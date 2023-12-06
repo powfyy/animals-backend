@@ -1,7 +1,7 @@
 package dev.pethaven.services;
 
 import dev.pethaven.entity.PetPhotos;
-import dev.pethaven.exception.MyMinioException;
+import dev.pethaven.exception.UntraceableMinioException;
 import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.messages.DeleteObject;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
@@ -44,17 +43,12 @@ public class MinioService {
         }
         catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
             log.error("Error create bucket: {}", e.getMessage());
-            throw new MyMinioException("Error when creating a bucket: "+ e.getMessage());
+            throw new UntraceableMinioException("Error when creating a bucket: "+ e.getMessage());
         }
     }
 
     public void uploadFile(ArrayList<MultipartFile> files, String bucketName) {
         files.forEach(file -> {
-//            try {
-//                InputStream fileInputStream = file.getInputStream();
-//            } catch (Exception e) {
-//                log.error("Error: {}", e.getMessage());
-//            }
             try {
                 minioClient.putObject(PutObjectArgs.builder()
                         .bucket(bucketName)
@@ -64,7 +58,7 @@ public class MinioService {
                         .build());
             } catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
                 log.error("Error upload file: {}", e.getMessage());
-                throw new MyMinioException("Error when uploading a file");
+                throw new UntraceableMinioException("Error when uploading a file");
             }
         });
     }
@@ -74,7 +68,7 @@ public class MinioService {
             minioClient.removeBucket(RemoveBucketArgs.builder().bucket(bucketName).build());
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | MinioException e) {
             log.error("Error remove: bucket {}", e.getMessage());
-            throw new MyMinioException("Error when deleting a bucket");
+            throw new UntraceableMinioException("Error when deleting a bucket");
         }
     }
 
@@ -92,7 +86,7 @@ public class MinioService {
             }
         } catch (InvalidKeyException | MinioException | IOException | NoSuchAlgorithmException e) {
             log.error("Error deleting files: {}", e.getMessage());
-            throw new MyMinioException("Error when deleting files");
+            throw new UntraceableMinioException("Error when deleting files");
         }
     }
 
@@ -107,11 +101,11 @@ public class MinioService {
             for (Result<DeleteError> result : results) {
                 DeleteError error = result.get();
                 log.error("Error in deleting object {}; {}", error.objectName(), error.message());
-                throw new MyMinioException("Error when deleting object " + error.objectName());
+                throw new UntraceableMinioException("Error when deleting object " + error.objectName());
             }
         } catch (InvalidKeyException | MinioException | IOException | NoSuchAlgorithmException e) {
             log.error("Error deleting files:{} ", e.getMessage());
-            throw new MyMinioException("Error when deleting files");
+            throw new UntraceableMinioException("Error when deleting files");
         }
     }
 }

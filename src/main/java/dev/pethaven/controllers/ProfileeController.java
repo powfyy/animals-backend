@@ -35,7 +35,7 @@ public class ProfileeController {
 
     @GetMapping("/user")
     public UserDTO getCurrentUser(Principal principal) {
-        return userService.getCurrentUser(principal);
+        return userService.getCurrentUser(principal.getName());
     }
 
     @PutMapping("/user")
@@ -43,14 +43,14 @@ public class ProfileeController {
         return userService.updateUser(updatedUser);
     }
 
-    @DeleteMapping("/user")
+    @DeleteMapping("/user ")
     public void deleteUser(Principal principal) {
-        userService.deleteCurrentUser(principal);
+        userService.deleteCurrentUser(principal.getName());
     }
 
     @GetMapping("/organization")
     public OrganizationDTO getOrganization(Principal principal) {
-        return organizationService.getCurrentOrganization(principal);
+        return organizationService.getCurrentOrganization(principal.getName());
     }
 
     @PutMapping("/organization")
@@ -60,17 +60,17 @@ public class ProfileeController {
 
     @DeleteMapping("/organization")
     public void deleteOrganization(Principal principal) {
-        organizationService.deleteCurrentOrganization(principal);
+        organizationService.deleteCurrentOrganization(principal.getName());
     }
 
     @GetMapping("/organization/pets")
     public List<PetDTO> getAllPets(Principal principal) {
-        return petService.getAllPetsCurrentOrganization(principal);
+        return petService.getAllPetsCurrentOrganization(principal.getName());
     }
 
     @PostMapping("/organization/pets")
-    public PetDTO addPet(Principal user, @ModelAttribute SavePet newPetInfo) {
-        return petService.addPet(user, newPetInfo);
+    public PetDTO addPet(Principal principal, @ModelAttribute SavePet newPetInfo) {
+        return petService.addPet(principal.getName(), newPetInfo);
     }
 
     @PutMapping("/organization/pets/{id}")
@@ -98,8 +98,8 @@ public class ProfileeController {
     }
 
     @GetMapping("/organization/pets/{id}/userRequest")
-    public Set<UserDTO> getUsersRequsts(@PathVariable("id") @NotNull(message = "Id cannot be null") Long petId) {
-        return petService.getUsersRequsts(petId);
+    public Set<UserDTO> getUserRequsts(@PathVariable("id") @NotNull(message = "Id cannot be null") Long petId) {
+        return petService.getUserRequsts(petId);
     }
 
     @DeleteMapping("/organization/pets/{id}/delUserRequest")

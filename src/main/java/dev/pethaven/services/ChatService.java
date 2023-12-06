@@ -27,9 +27,9 @@ public class ChatService {
     @Autowired
     ChatMapper chatMapper;
 
-    public Page<ChatDTO> getChats(Principal principal, int page, int size) {
+    public Page<ChatDTO> getChats(int page, int size, String username) {
         return chatRepository.findChatsByUsername(
-                        principal.getName(),
+                        username,
                         PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateLastMessage")))
                 .map(chatMapper::toDTO);
     }
@@ -38,8 +38,8 @@ public class ChatService {
                            @NotNull(message = "User's username can't be null") String userUsername) {
         return chatRepository.findChatByUsernames(organizationUsername, userUsername).orElseGet(() -> {
             Chat chat = new Chat();
-            chat.setUser(userService.findByUsername(userUsername));
-            chat.setOrganization(organizationService.findByUsername(organizationUsername));
+            chat.setUserId(userService.findByUsername(userUsername).getId());
+            chat.setOrganizationId(organizationService.findByUsername(organizationUsername).getId());
             chatRepository.save(chat);
             return chat;
         });

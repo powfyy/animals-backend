@@ -40,13 +40,17 @@ public class Pet {
     @Enumerated(EnumType.STRING)
     PetStatus status;
 
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
-
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+    @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     private User user;
+    @Column(name="user_id")
+    private Long userId;
+
+    @JoinColumn(name = "organization_id", nullable = false, insertable = false, updatable = false)
+    @ManyToOne(targetEntity = Organization.class, fetch = FetchType.LAZY)
+    private Organization organization;
+    @Column(name="organization_id")
+    private Long organizationId;
 
     @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
     private List<PetPhotos> petPhotos;
@@ -98,4 +102,13 @@ public class Pet {
         this.status = status;
     }
 
+    public void setOrganization(Organization organization) {
+        setOrganizationId(organization.getId());
+        this.organization = organization;
+    }
+
+    public void setUser(User user) {
+        setUserId(user.getId());
+        this.user = user;
+    }
 }

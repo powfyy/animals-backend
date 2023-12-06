@@ -54,8 +54,8 @@ public class PetService {
         return petRepository.findAll(specification, PageRequest.of(page, size)).map(petMapper::toDTO);
     }
 
-    public List<PetDTO> getAllPetsCurrentOrganization(Principal principal) {
-        List<Pet> petsArray = petRepository.findByOrganizationUsername(principal.getName());
+    public List<PetDTO> getAllPetsCurrentOrganization(String organizationUsername) {
+        List<Pet> petsArray = petRepository.findByOrganizationUsername(organizationUsername);
         return petsArray.stream()
                 .map(el -> petMapper.toDTO(el))
                 .collect(Collectors.toList());
@@ -72,7 +72,7 @@ public class PetService {
     }
 
     @Transactional
-    public PetDTO addPet(Principal principal, @Valid SavePet newPetInfo) {
+    public PetDTO addPet(String organizationUsername, @Valid SavePet newPetInfo) {
         Pet tempPet = petMapper.toEntity(newPetInfo);
         Pet newPet = new Pet(
                 tempPet.getName(),
@@ -82,7 +82,7 @@ public class PetService {
                 tempPet.getBreed(),
                 tempPet.getDescription(),
                 PetStatus.ACTIVE);
-        newPet.setOrganization(organizationService.findByUsername(principal.getName()));
+        newPet.setOrganizationId(organizationService.findByUsername(organizationUsername).getId());
         petRepository.save(newPet);
         String bucketName = newPet.getId().toString() + "-" + newPet.getTypePet().toString().toLowerCase();
         minioService.createBucket(bucketName);
@@ -90,8 +90,7 @@ public class PetService {
             minioService.uploadFile(newPetInfo.getFiles(), bucketName);
             List<PetPhotos> petPhotosList = new ArrayList<>();
             newPetInfo.getFiles().forEach(file -> {
-                PetPhotos petPhotos = new PetPhotos(file.getOriginalFilename());
-                petPhotos.setPet(newPet);
+                PetPhotos petPhotos = new PetPhotos(file.getOriginalFilename(), newPet.getId());
                 petPhotosList.add(petPhotos);
             });
             petPhotosRepository.saveAll(petPhotosList);
@@ -111,11 +110,12 @@ public class PetService {
         }
         if (!updatedPet.getFiles().isEmpty()) {
             minioService.uploadFile(updatedPet.getFiles(), bucketName);
+            List<PetPhotos> petPhotosList = new ArrayList<>();
             updatedPet.getFiles().forEach(file -> {
-                //todo
-                PetPhotos petPhotos = new PetPhotos(null, file.getOriginalFilename(), oldPet);
-                petPhotosRepository.save(petPhotos);
+                PetPhotos petPhotos = new PetPhotos(file.getOriginalFilename(), oldPet.getId());
+                petPhotosList.add(petPhotos);
             });
+            petPhotosRepository.saveAll(petPhotosList);
         }
         petMapper.updatePet(updatedPet, oldPet);
         petRepository.save(oldPet);
@@ -142,7 +142,7 @@ public class PetService {
             throw new InvalidPetStatusException("Incorrect pet status. It is required to be FREEZE");
         }
         User user = userService.findByUsername(username);
-        user.getPetSet().remove(pet);
+//        user.getPetSet().remove(pet);
         pet.setUser(user);
         pet.getUserSet().clear();
         pet.setStatus(PetStatus.ADOPTED);
@@ -168,20 +168,20 @@ public class PetService {
         }
     }
 
-    public Map<String, Boolean> checkRequest(Principal principal, @NotNull(message = "Id cannot be null") Long petId) {
-        User user = userService.findByUsername(principal.getName());
+    public Map<String, Boolean> checkRequest(String username, @NotNull(message = "Id cannot be null") Long petId) {
+        User user = userService.findByUsername(username);
         if (user.getPetSet().contains(findById(petId))) {
             return Collections.singletonMap("isThereRequest", true);
         }
         return Collections.singletonMap("isThereRequest", false);
     }
 
-    public Set<UserDTO> getUsersRequsts(@NotNull(message = "Id can't be null") Long petId) {
+    public Set<UserDTO> getUserRequsts(@NotNull(message = "Id can't be null") Long petId) {
         return userMapper.toDtoSet(findById(petId).getUserSet());
     }
 
-    public void requestForPet(Principal principal, @NotNull(message = "Id cannot be null") Long petId) {
-        User currentUser = userService.findByUsername(principal.getName());
+    public void requestForPet(String username, @NotNull(message = "Id cannot be null") Long petId) {
+        User currentUser = userService.findByUsername(username);
         currentUser.getPetSet().add(findById(petId));
         userService.save(currentUser);
     }

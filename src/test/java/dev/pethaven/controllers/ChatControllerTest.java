@@ -10,9 +10,8 @@ import dev.pethaven.enums.Role;
 import dev.pethaven.mappers.MessageMapper;
 import dev.pethaven.repositories.*;
 import dev.pethaven.services.ChatService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.hibernate.Hibernate;
+import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -74,6 +73,8 @@ public class ChatControllerTest {
     @Autowired
     AuthRepository authRepository;
     @Autowired
+    ChatRepository chatRepository;
+    @Autowired
     UserRepository userRepository;
     @Autowired
     PetRepository petRepository;
@@ -83,8 +84,6 @@ public class ChatControllerTest {
     MessageRepository messageRepository;
     @Autowired
     MessageMapper messageMapper;
-    Organization organization;
-    User user;
     @Mock
     Principal principal;
     @Autowired
@@ -94,17 +93,14 @@ public class ChatControllerTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    User user;
+    Organization organization;
+
+    Chat chat;
+    Pet pet;
+
     @BeforeEach
     void setData() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        authRepository.deleteAll();
-        userRepository.deleteAll();
-        organizationRepository.deleteAll();
-        Auth authUser = new Auth("testUser", Role.USER, passwordEncoder.encode("1234"), true);
-        user = new User("Name", "Last name", "71234567890");
-        user.setAuth(authUser);
-        userRepository.save(user);
-
         Auth authOrg = new Auth("testOrg", Role.ORG, passwordEncoder.encode("1234"), true);
         organization = new Organization(null,
                 "NameOrg",
@@ -113,21 +109,38 @@ public class ChatControllerTest {
                 "312132",
                 "71234567890");
         organization.setAuth(authOrg);
+        Auth authUser = new Auth("testUser", Role.USER, passwordEncoder.encode("1234"), true);
+        user = new User("Name", "Last name", "71234567890");
+        user.setAuth(authUser);
+        pet = new Pet("testName", PetGender.M, PetType.DOG, LocalDate.now(), "testBreed", null, PetStatus.ACTIVE);
+        authRepository.deleteAll();
+        userRepository.deleteAll();
+        organizationRepository.deleteAll();
+        userRepository.save(user);
         organizationRepository.save(organization);
+
+        messageRepository.deleteAll();
+        chatRepository.deleteAll();
+        chat = chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
+    @BeforeEach
+    void setDataRepeat() {
+
     }
 
     @Test
     @Transactional
     public void testAddMessage() throws Exception {
-        Chat chat = chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
         Message message = new Message(
                 1L,
                 "Test message",
-                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0));
-        message.setChat(chat);
-        message.setUser(user);
+                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0),
+                chat.getId());
+        message.setUserId(user.getId());
         MessageDTO messageDTO = messageMapper.toDto(message);
         messageDTO.setDate("19.11.2023 15:00:00");
+
         when(principal.getName()).thenReturn("testUser");
 
         mockMvc.perform(post("/api/chats/messages").principal(principal)
@@ -139,15 +152,16 @@ public class ChatControllerTest {
     }
 
     @Test
+    @Transactional
     public void testGetMessages() throws Exception {
-        Chat chat = chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
         Message message = new Message(
                 1L,
                 "Test message",
-                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0));
-        message.setChat(chat);
-        message.setUser(user);
+                LocalDateTime.of(2023, Month.NOVEMBER, 19, 15, 0, 0),
+                chat.getId());
+        message.setUserId(user.getId());
         messageRepository.save(message);
+
 
         when(principal.getName()).thenReturn("testUser");
 
@@ -160,8 +174,6 @@ public class ChatControllerTest {
 
     @Test
     public void testGetChats() throws Exception {
-        chatService.createChat(organization.getAuth().getUsername(), user.getAuth().getUsername());
-
         when(principal.getName()).thenReturn("testUser");
 
         mockMvc.perform(get("/api/chats").principal(principal))
@@ -176,7 +188,6 @@ public class ChatControllerTest {
         chat.setId(1L);
         chat.setOrganization(organization);
         chat.setUser(user);
-        Pet pet = new Pet("testName", PetGender.M, PetType.DOG, LocalDate.now(), "testBreed", null, PetStatus.ACTIVE);
         pet.setOrganization(organization);
         petRepository.save(pet);
 

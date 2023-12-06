@@ -39,29 +39,31 @@ public class MessageService {
     @Autowired
     ChatService chatService;
 
-    public Page<MessageDTO> getMessagesByChat(Long chatId, int page, int size, Principal principal) {
-        if (!chatService.isParticipant(chatId, principal.getName())) {
+    public Page<MessageDTO> getMessagesByChat(Long chatId, int page, int size, String principalName) {
+        if (!chatService.isParticipant(chatId, principalName)) {
             throw new InvalidChatException("The messages of this chat are not available");
         }
         return messageRepository.findAllByChatId(chatId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"))).map(messageMapper::toDto);
     }
 
     @Transactional
-    public void addMessage(@Valid MessageDTO messageDTO, Principal principal) {
-        if (!chatService.isParticipant(messageDTO.getChatId(), principal.getName())) {
+    public void addMessage(@Valid MessageDTO messageDTO, String username) {
+        if (!chatService.isParticipant(messageDTO.getChatId(), username)) {
             throw new InvalidChatException("The messages of this chat are not available");
         }
         Chat chat = chatService.findById(messageDTO.getChatId());
-        Message newMessage = new Message(null,
+        Message newMessage = new Message(
                 messageDTO.getMessage(),
-                LocalDateTime.parse(messageDTO.getDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
-        newMessage.setChat(chat);
+                LocalDateTime.parse(messageDTO.getDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")),
+                chat.getId()
+        );
         if (messageDTO.getUserUsername() != null) {
-            newMessage.setUser(userService.findByUsername(messageDTO.getUserUsername()));
+            newMessage.setUserId(chat.getUserId());
         } else {
-            newMessage.setOrganization(organizationService.findByUsername(messageDTO.getOrganizationUsername()));
+            newMessage.setOrganizationId(chat.getOrganizationId());
         }
         chat.setDateLastMessage(newMessage.getDate());
+        newMessage.setChat(chat);
         messageRepository.save(newMessage);
     }
 
@@ -71,11 +73,12 @@ public class MessageService {
         Pet pet = petService.findById(petId);
         Message message = new Message(
                 "Заявка на питомца с кличкой " + pet.getName() + ". Ссылка на питомца: http://localhost:4200/home/" + pet.getId(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                chat.getId()
         );
-        message.setChat(chat);
-        message.setUser(chat.getUser());
+        message.setUserId(chat.getUserId());
         chat.setDateLastMessage(message.getDate());
+        message.setChat(chat);
         messageRepository.save(message);
     }
 }

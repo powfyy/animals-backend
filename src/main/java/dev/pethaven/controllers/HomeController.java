@@ -25,7 +25,7 @@ public class HomeController {
 
     @PostMapping(value = "/pets/{id}")
     public void requestForPet(@PathVariable("id") Long petId, Principal principal) {
-        petService.requestForPet(principal,petId);
+        petService.requestForPet(principal.getName(),petId);
     }
 
     @PostMapping(value = "/pets")
@@ -48,6 +48,6 @@ public class HomeController {
 
     @GetMapping(value = "/pets/{id}/request")
     public Map<String, Boolean> checkRequest(@PathVariable("id") Long petId, Principal principal) {
-        return petService.checkRequest(principal, petId);
+        return petService.checkRequest(principal.getName(), petId);
     }
 }
