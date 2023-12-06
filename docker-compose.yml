@@ -1,0 +1,56 @@
+version: '3.9'
+services:
+  angular-app:
+    image: 'angular-app-image'
+    container_name: angular-app1
+    ports:
+      - '4200:80'
+    networks:
+      - localnet
+    restart: unless-stopped
+
+  spring-app:
+    image: 'spring-app-image'
+    container_name: spring-app1
+    ports:
+      - '8080:8080'
+    networks:
+      - localnet
+    depends_on:
+      - postgresdb
+      - minio
+    restart: unless-stopped
+
+  minio:
+    image: 'quay.io/minio/minio'
+    container_name: minio1
+    ports:
+      - '9000:9000'
+      - '9090:9090'
+    volumes:
+      - 'D:\Proekti\PetHaven\data:/data'
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9090"
+    networks:
+      - localnet
+    restart: unless-stopped
+  
+  postgresdb:
+    image: 'postgres:15'
+    container_name: postgresql1
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=pethaven
+      - POSTGRES_PASSWORD=sadmin
+    networks:
+      - localnet
+    restart: always
+
+networks:
+  localnet:
+    driver: bridge
+    name: localnet
