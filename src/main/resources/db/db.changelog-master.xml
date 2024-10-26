@@ -3,17 +3,5 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
-    <include file="changelog/001_create_table_auth.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/002_create_table_users.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/003_create_table_organizations.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/004_create_table_pets.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/005_create_table_pet_photos.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/006_create_table_user_pet.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/007_add_description_to_pets.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/008_add_city_to_organizations.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/009_update_city_not_null.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/010_add_not_null_constraint.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/011_create_table_chats.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/012_create_table_messages.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/013_add_date_to_chats.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/changelog-0.0.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
