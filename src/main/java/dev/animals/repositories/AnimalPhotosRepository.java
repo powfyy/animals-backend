@@ -1,6 +1,6 @@
 package dev.animals.repositories;
 
-import dev.animals.entity.AnimalPhotosEntity;
+import dev.animals.entity.animal.AnimalPhotosEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

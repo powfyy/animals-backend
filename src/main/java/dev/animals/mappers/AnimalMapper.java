@@ -1,9 +1,9 @@
 package dev.animals.mappers;
 
 import dev.animals.dto.AnimalDto;
-import dev.animals.entity.AnimalEntity;
-import dev.animals.entity.AnimalPhotosEntity;
 import dev.animals.dto.AnimalSaveDto;
+import dev.animals.entity.animal.AnimalEntity;
+import dev.animals.entity.animal.AnimalPhotosEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

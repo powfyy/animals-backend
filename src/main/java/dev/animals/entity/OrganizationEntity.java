@@ -1,5 +1,6 @@
 package dev.animals.entity;
 
+import dev.animals.entity.animal.AnimalEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -10,6 +10,7 @@ import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mappers.OrganizationMapper;
 import dev.animals.repositories.OrganizationRepository;
+import dev.animals.services.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

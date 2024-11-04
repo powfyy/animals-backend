@@ -1,6 +1,6 @@
 package dev.animals.auth;
 
-import dev.animals.services.AuthDetailsServiceImpl;
+import dev.animals.services.auth.AuthDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;

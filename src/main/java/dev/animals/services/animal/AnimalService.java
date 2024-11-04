@@ -1,16 +1,22 @@
-package dev.animals.services;
+package dev.animals.services.animal;
 
 import dev.animals.dto.AnimalDto;
-import dev.animals.dto.UserDto;
-import dev.animals.entity.*;
-import dev.animals.enums.PetStatus;
-import dev.animals.dto.FilterFields;
 import dev.animals.dto.AnimalSaveDto;
+import dev.animals.dto.FilterFields;
+import dev.animals.dto.UserDto;
+import dev.animals.entity.UserEntity;
+import dev.animals.entity.animal.AnimalEntity;
+import dev.animals.entity.animal.AnimalPhotosEntity;
+import dev.animals.enums.PetStatus;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mappers.AnimalMapper;
 import dev.animals.mappers.UserMapper;
-import dev.animals.repositories.*;
+import dev.animals.repositories.AnimalPhotosRepository;
+import dev.animals.repositories.AnimalRepository;
+import dev.animals.services.MinioService;
+import dev.animals.services.OrganizationService;
+import dev.animals.services.UserService;
 import dev.animals.specifications.PetSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,14 +99,14 @@ public class AnimalService {
     AnimalEntity newAnimal = new AnimalEntity(
       tempAnimal.getName(),
       tempAnimal.getGender(),
-      tempAnimal.getTypePet(),
+      tempAnimal.getType(),
       tempAnimal.getBirthDay(),
       tempAnimal.getBreed(),
       tempAnimal.getDescription(),
       PetStatus.ACTIVE);
     newAnimal.setOrganization(organizationService.findByUsername(organizationUsername));
     animalRepository.save(newAnimal);
-    String bucketName = newAnimal.getId().toString() + "-" + newAnimal.getTypePet().toString().toLowerCase();
+    String bucketName = newAnimal.getId().toString() + "-" + newAnimal.getType().toString().toLowerCase();
     minioService.createBucket(bucketName);
     if (!dto.getFiles().isEmpty()) {
       minioService.uploadFile(dto.getFiles(), bucketName);
@@ -153,7 +159,7 @@ public class AnimalService {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить животное: переданный id равен null");
     }
     AnimalEntity animal = findById(id);
-    String bucketName = animal.getId() + "-" + animal.getTypePet().toString().toLowerCase();
+    String bucketName = animal.getId() + "-" + animal.getType().toString().toLowerCase();
     if (!animal.getAnimalPhotos().isEmpty()) {
       minioService.removeFiles(bucketName, animal.getAnimalPhotos());
     }

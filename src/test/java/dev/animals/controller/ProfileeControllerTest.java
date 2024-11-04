@@ -54,7 +54,7 @@ class ProfileeControllerTest {
 //        MockitoAnnotations.openMocks(this);
 //        OrganizationEntity organization =new OrganizationEntity(1L, "TeddyFood","Воронеж" ,"2020", "123456", "79203335544",
 //                new AuthEntity(1L, "username", Role.ORG, passwordEncoder.encode("ffff"), true));
-//        AnimalEntity pet = new AnimalEntity(1L, "Буся", PetGender.F, PetType.DOG, LocalDate.of(2019, 3, 12),
+//        AnimalEntity pet = new AnimalEntity(1L, "Буся", GenderType.F, PetType.DOG, LocalDate.of(2019, 3, 12),
 //                "помчи","", PetStatus.ACTIVE, organization);
 //        AnimalDto petDTO = petMapper.toDto(pet);
 //        List<AnimalEntity> petList = new ArrayList<>();

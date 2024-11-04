@@ -1,4 +1,4 @@
-package dev.animals.services;
+package dev.animals.services.chat;
 
 import dev.animals.dto.ChatDto;
 import dev.animals.entity.ChatEntity;
@@ -6,6 +6,8 @@ import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mappers.ChatMapper;
 import dev.animals.repositories.ChatRepository;
+import dev.animals.services.OrganizationService;
+import dev.animals.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;

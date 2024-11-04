@@ -9,6 +9,7 @@ import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mappers.UserMapper;
 import dev.animals.repositories.UserRepository;
+import dev.animals.services.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;

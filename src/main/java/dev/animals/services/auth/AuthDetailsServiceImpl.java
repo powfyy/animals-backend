@@ -1,9 +1,8 @@
-package dev.animals.services;
+package dev.animals.services.auth;
 
 import dev.animals.entity.AuthEntity;
 import dev.animals.repositories.AuthRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

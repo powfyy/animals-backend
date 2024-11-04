@@ -1,8 +1,8 @@
 package dev.animals.controller;
 
 import dev.animals.dto.*;
-import dev.animals.services.AnimalService;
 import dev.animals.services.OrganizationService;
+import dev.animals.services.animal.AnimalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

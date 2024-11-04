@@ -1,6 +1,6 @@
 package dev.animals.services;
 
-import dev.animals.entity.AnimalPhotosEntity;
+import dev.animals.entity.animal.AnimalPhotosEntity;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import io.minio.*;

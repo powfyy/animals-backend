@@ -3,7 +3,7 @@ package dev.animals.configs;
 import dev.animals.auth.AuthEntryPointJwt;
 import dev.animals.auth.AuthTokenFilter;
 import dev.animals.enums.Role;
-import dev.animals.services.AuthDetailsServiceImpl;
+import dev.animals.services.auth.AuthDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

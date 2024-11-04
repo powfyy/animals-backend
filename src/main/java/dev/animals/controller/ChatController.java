@@ -2,8 +2,8 @@ package dev.animals.controller;
 
 import dev.animals.dto.ChatDto;
 import dev.animals.dto.MessageDto;
-import dev.animals.services.ChatService;
-import dev.animals.services.MessageService;
+import dev.animals.services.chat.ChatService;
+import dev.animals.services.chat.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

@@ -2,9 +2,9 @@ package dev.animals.controller;
 
 import dev.animals.auth.JwtUtils;
 import dev.animals.dto.*;
-import dev.animals.services.AuthDetailsImpl;
 import dev.animals.services.OrganizationService;
 import dev.animals.services.UserService;
+import dev.animals.services.auth.AuthDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

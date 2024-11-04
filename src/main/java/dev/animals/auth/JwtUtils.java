@@ -1,6 +1,6 @@
 package dev.animals.auth;
 
-import dev.animals.services.AuthDetailsImpl;
+import dev.animals.services.auth.AuthDetailsImpl;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;

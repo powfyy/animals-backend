@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="04.11.24" author="Dmitry Serebryansky">
+
+        <modifyDataType tableName="animals"
+                        columnName="type"
+                        newDataType="varchar(255)"/>
+
+        <createTable tableName="animal_types">
+            <column name="name"
+                    type="VARCHAR(255)">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_animaltypeentity"/>
+            </column>
+            <column name="priority"
+                    type="INT"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="type"
+                                 baseTableName="animals"
+                                 constraintName="FK_ANIMALS_ON_TYPE"
+                                 referencedColumnNames="name"
+                                 referencedTableName="animal_type_entity"/>
+
+        <createTable tableName="attributes">
+            <column name="name"
+                    type="VARCHAR(255)">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_attributes"/>
+            </column>
+            <column name="priority"
+                    type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="animal_type_attributes">
+            <column name="attribute_name" type="VARCHAR(255)"/>
+            <column name="type_name" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="type_name, attribute_name" constraintName="pk_animal_type_attributes"
+                       tableName="animal_type_attributes"/>
+
+        <addForeignKeyConstraint baseColumnNames="type_name" baseTableName="animal_type_attributes"
+                                 constraintName="FK_ANIMAL_TYPE_ATTRIBUTES_ON_ANIMAL_TYPE_NAME"
+                                 referencedColumnNames="name" referencedTableName="animal_types"/>
+
+        <addForeignKeyConstraint baseColumnNames="attribute_name" baseTableName="animal_type_attributes"
+                                 constraintName="FK_ANIMAL_TYPE_ATTRIBUTES_ON_ATTRIBUTE_NAME"
+                                 referencedColumnNames="name" referencedTableName="attributes"/>
+
+    </changeSet>
+</databaseChangeLog>

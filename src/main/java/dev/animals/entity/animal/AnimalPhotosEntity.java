@@ -1,6 +1,8 @@
-package dev.animals.entity;
+package dev.animals.entity.animal;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 

@@ -1,8 +1,8 @@
-package dev.animals.services;
+package dev.animals.services.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.animals.enums.Role;
 import dev.animals.entity.AuthEntity;
+import dev.animals.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

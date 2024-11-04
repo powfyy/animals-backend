@@ -1,6 +1,6 @@
 package dev.animals.repositories;
 
-import dev.animals.entity.AnimalEntity;
+import dev.animals.entity.animal.AnimalEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

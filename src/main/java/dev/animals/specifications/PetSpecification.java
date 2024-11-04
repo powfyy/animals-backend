@@ -1,11 +1,10 @@
 package dev.animals.specifications;
 
 import dev.animals.dto.FilterFields;
-import dev.animals.entity.AnimalEntity;
 import dev.animals.entity.OrganizationEntity;
-import dev.animals.enums.PetGender;
+import dev.animals.entity.animal.AnimalEntity;
+import dev.animals.enums.GenderType;
 import dev.animals.enums.PetStatus;
-import dev.animals.enums.PetType;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
@@ -14,18 +13,21 @@ import java.util.List;
 
 
 public class PetSpecification implements Specification<AnimalEntity> {
+
     private final FilterFields filterFields;
+
     public PetSpecification(FilterFields filterFields){
         this.filterFields=filterFields;
     }
+
     @Override
     public Predicate toPredicate(Root<AnimalEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
         if (filterFields.getGender() != null) {
-            predicates.add(criteriaBuilder.equal(root.get("gender"), PetGender.valueOf(filterFields.getGender())));
+            predicates.add(criteriaBuilder.equal(root.get("gender"), GenderType.valueOf(filterFields.getGender())));
         }
         if (filterFields.getPetType() != null) {
-            predicates.add(criteriaBuilder.equal(root.get("typePet"), PetType.valueOf(filterFields.getPetType())));
+            predicates.add(criteriaBuilder.equal(root.get("type"), filterFields.getPetType()));
         }
         if (filterFields.getName() != null) {
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + filterFields.getName().toLowerCase() + "%"));

@@ -1,4 +1,4 @@
-package dev.animals.services;
+package dev.animals.services.auth;
 
 import dev.animals.entity.AuthEntity;
 import dev.animals.enums.Role;
