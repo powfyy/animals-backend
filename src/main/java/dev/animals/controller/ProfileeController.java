@@ -3,7 +3,6 @@ package dev.animals.controller;
 import dev.animals.dto.*;
 import dev.animals.services.AnimalService;
 import dev.animals.services.OrganizationService;
-import dev.animals.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,22 +19,6 @@ public class ProfileeController {
 
   private final AnimalService animalService;
   private final OrganizationService organizationService;
-  private final UserService userService;
-
-  @GetMapping("/user")
-  public UserDto getCurrentUser(Principal principal) {
-    return userService.getByUsername(principal.getName());
-  }
-
-  @PutMapping("/user")
-  public UserDto updateUser(@RequestBody @Valid UserDto updatedUser) {
-    return userService.update(updatedUser);
-  }
-
-  @DeleteMapping("/user")
-  public void deleteUser(Principal principal) {
-    userService.deleteByUsername(principal.getName());
-  }
 
   @GetMapping("/organization")
   public OrganizationDto getOrganization(Principal principal) {
