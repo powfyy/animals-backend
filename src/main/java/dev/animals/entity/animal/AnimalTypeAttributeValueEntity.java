@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Data
 @Entity
 @NoArgsConstructor
-@Table(name = "animal_type_attribute_values") //todo нужен скрипт liquibase
+@Table(name = "animal_type_attribute_values")
 public class AnimalTypeAttributeValueEntity {
 
   @EmbeddedId
