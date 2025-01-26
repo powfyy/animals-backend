@@ -1,4 +1,4 @@
-package dev.animals.entity.animal;
+package dev.animals.entity.attribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,8 +11,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "animal_types")
-public class AnimalTypeEntity {
+@Table(name = "attributes")
+public class AttributeEntity {
 
   @Id
   private String name;
@@ -20,6 +20,6 @@ public class AnimalTypeEntity {
   @Column(nullable = false)
   private int priority;
 
-  @OneToMany(cascade = CascadeType.ALL)
-  private List<AnimalTypeAttributeValueEntity> attributes;
+  @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<AttributeValueEntity> values;
 }

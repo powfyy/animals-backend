@@ -6,6 +6,10 @@
 
     <changeSet id="04.11.24" author="Dmitry Serebryansky">
 
+        <renameColumn tableName="animals"
+                      oldColumnName="type_pet"
+                      newColumnName="type"/>
+
         <modifyDataType tableName="animals"
                         columnName="type"
                         newDataType="varchar(255)"/>
@@ -15,7 +19,7 @@
                     type="VARCHAR(255)">
                 <constraints nullable="false"
                              primaryKey="true"
-                             primaryKeyName="pk_animaltypeentity"/>
+                             primaryKeyName="pk_animal_types"/>
             </column>
             <column name="priority"
                     type="INT"/>
@@ -23,9 +27,9 @@
 
         <addForeignKeyConstraint baseColumnNames="type"
                                  baseTableName="animals"
-                                 constraintName="FK_ANIMALS_ON_TYPE"
                                  referencedColumnNames="name"
-                                 referencedTableName="animal_type_entity"/>
+                                 referencedTableName="animal_types"
+                                 constraintName="FK_ANIMALS_ON_TYPE"/>
 
         <createTable tableName="attributes">
             <column name="name"
@@ -40,21 +44,79 @@
             </column>
         </createTable>
 
-        <createTable tableName="animal_type_attributes">
-            <column name="attribute_name" type="VARCHAR(255)"/>
-            <column name="type_name" type="VARCHAR(255)"/>
+        <createTable tableName="attribute_values">
+            <column name="value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
-        <addPrimaryKey columnNames="type_name, attribute_name" constraintName="pk_animal_type_attributes"
-                       tableName="animal_type_attributes"/>
+        <addPrimaryKey columnNames="value, attribute_name"
+                       constraintName="pk_attribute_values"
+                       tableName="attribute_values"/>
 
-        <addForeignKeyConstraint baseColumnNames="type_name" baseTableName="animal_type_attributes"
-                                 constraintName="FK_ANIMAL_TYPE_ATTRIBUTES_ON_ANIMAL_TYPE_NAME"
-                                 referencedColumnNames="name" referencedTableName="animal_types"/>
+        <addForeignKeyConstraint baseTableName="attribute_values"
+                                 baseColumnNames="attribute_name"
+                                 referencedTableName="attributes"
+                                 referencedColumnNames="name"
+                                 constraintName="FK_ATTRIBUTE_VALUES_ON_ATTRIBUTE_NAME"/>
 
-        <addForeignKeyConstraint baseColumnNames="attribute_name" baseTableName="animal_type_attributes"
-                                 constraintName="FK_ANIMAL_TYPE_ATTRIBUTES_ON_ATTRIBUTE_NAME"
-                                 referencedColumnNames="name" referencedTableName="attributes"/>
+        <createTable tableName="animal_type_attribute_values">
+            <column name="type_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="type_name, attribute_value, attribute_name"
+                       constraintName="pk_animal_type_attribute_values"
+                       tableName="animal_type_attribute_values"/>
+
+        <addForeignKeyConstraint baseColumnNames="type_name" baseTableName="animal_type_attribute_values"
+                                 referencedColumnNames="name" referencedTableName="animal_types"
+                                 constraintName="FK_ANIMAL_TYPE_ATTRIBUTE_VALUES_ON_TYPE_NAME"/>
+
+        <addForeignKeyConstraint baseColumnNames="attribute_name, attribute_value"
+                                 baseTableName="animal_type_attribute_values"
+                                 referencedColumnNames="attribute_name, value" referencedTableName="attribute_values"
+                                 constraintName="FK_ANIMAL_TYPE_ATTRIBUTE_VALUES_ON_ATTRIBUTE_NAME_VALUE"/>
+
+
+        <createTable tableName="animal_attribute_values">
+            <column name="animal_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="animal_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="animal_id, attribute_name"
+                       constraintName="pk_animal_attribute_values"
+                       tableName="animal_attribute_values"/>
+
+        <addForeignKeyConstraint baseColumnNames="animal_id" baseTableName="animal_attribute_values"
+                                 referencedColumnNames="id" referencedTableName="animals"
+                                 constraintName="FK_ANIMAL_ATTRIBUTE_VALUES_ON_ANIMAL_ID"/>
+
+        <addForeignKeyConstraint baseColumnNames="animal_type, attribute_name, attribute_value"
+                                 baseTableName="animal_attribute_values"
+                                 referencedColumnNames="type_name, attribute_name, attribute_value"
+                                 referencedTableName="animal_type_attribute_values"
+                                 constraintName="FK_ANIMAL_ATTRIBUTE_VALUES_ON_ANIMAL_TYPE_ATTRIBUTE_VALUES"/>
 
     </changeSet>
 </databaseChangeLog>

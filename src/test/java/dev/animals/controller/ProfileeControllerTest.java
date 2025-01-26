@@ -1,10 +1,11 @@
 package dev.animals.controller;
 
-import dev.animals.mappers.AnimalMapper;
-import dev.animals.repositories.AnimalRepository;
-import dev.animals.repositories.AuthRepository;
-import dev.animals.repositories.OrganizationRepository;
-import dev.animals.repositories.UserRepository;
+import dev.animals.mapper.AnimalMapper;
+import dev.animals.repository.AuthRepository;
+import dev.animals.repository.OrganizationRepository;
+import dev.animals.repository.UserRepository;
+import dev.animals.repository.animal.AnimalRepository;
+import dev.animals.web.controller.ProfileeController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

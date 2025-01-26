@@ -57,6 +57,9 @@ public class AnimalEntity {
   @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL)
   private List<AnimalPhotosEntity> animalPhotos;
 
+  @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL)
+  private List<AnimalAttributeValueEntity> attributeValues;
+
   @ManyToMany(mappedBy = "animalSet")
   private Set<UserEntity> userSet = new HashSet<>();
 

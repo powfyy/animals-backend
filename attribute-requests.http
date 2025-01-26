@@ -1,0 +1,22 @@
+### получить все
+GET http://localhost:8080/api/attribute?page=0&size=25
+
+### получить по названию
+GET http://localhost:8080/api/attribute/name?name=окрас
+
+### сохранить
+POST http://localhost:8080/api/attribute
+Content-Type: application/json
+
+{
+  "name": "Окрас",
+  "priority": 0,
+  "values": [
+    "Синий",
+    "Красный",
+    "Зеленый"
+  ]
+}
+
+### удаление
+DELETE http://localhost:8080/api/attribute?name=окрас
