@@ -1,4 +1,4 @@
-package dev.animals.mapper;
+package dev.animals.mapper.animal;
 
 import dev.animals.entity.animal.AnimalEntity;
 import dev.animals.entity.animal.AnimalPhotosEntity;

@@ -1,4 +1,4 @@
-package dev.animals.entity.pk.animal;
+package dev.animals.entity.pk;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,9 +17,9 @@ public class AnimalTypeAttributeValuePK implements Serializable {
   @Column(name = "type_name")
   private String typeName;
 
-  @Column(name = "attribute_value")
-  private String attributeValue;
-
   @Column(name = "attribute_name")
   private String attributeName;
+
+  @Column(name = "attribute_value")
+  private String attributeValue;
 }

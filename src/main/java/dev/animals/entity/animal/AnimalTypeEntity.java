@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -20,6 +21,6 @@ public class AnimalTypeEntity {
   @Column(nullable = false)
   private int priority;
 
-  @OneToMany(cascade = CascadeType.ALL)
-  private List<AnimalTypeAttributeValueEntity> attributes;
+  @OneToMany(mappedBy = "animalType", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<AnimalTypeAttributeValueEntity> attributes = new ArrayList<>();
 }

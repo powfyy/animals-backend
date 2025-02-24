@@ -25,10 +25,9 @@ public class HomeController {
   }
 
   @PostMapping
-  public Page<AnimalDto> getFilteredPets(
-    @RequestParam(required = false, defaultValue = "0") int page,
-    @RequestParam(required = false, defaultValue = "15") int size,
-    @RequestBody FilterFields filterFields) {
+  public Page<AnimalDto> getFilteredPets(@RequestParam(required = false, defaultValue = "0") int page,
+                                         @RequestParam(required = false, defaultValue = "15") int size,
+                                         @RequestBody FilterFields filterFields) {
     return animalService.getAll(page, size, filterFields);
   }
 

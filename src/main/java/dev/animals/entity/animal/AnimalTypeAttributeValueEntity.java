@@ -1,7 +1,7 @@
 package dev.animals.entity.animal;
 
 import dev.animals.entity.attribute.AttributeValueEntity;
-import dev.animals.entity.pk.animal.AnimalTypeAttributeValuePK;
+import dev.animals.entity.pk.AnimalTypeAttributeValuePK;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,8 +22,8 @@ public class AnimalTypeAttributeValueEntity {
 
   @ManyToOne
   @JoinColumns({
-    @JoinColumn(name = "attribute_value", insertable = false, updatable = false),
-    @JoinColumn(name = "attribute_name", insertable = false, updatable = false)
+    @JoinColumn(name = "attribute_name", insertable = false, updatable = false),
+    @JoinColumn(name = "attribute_value", insertable = false, updatable = false)
   })
   private AttributeValueEntity attribute;
 

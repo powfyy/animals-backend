@@ -1,0 +1,17 @@
+### получение видов
+GET http://localhost:8080/api/animal/type
+
+### сохранение вида
+POST http://localhost:8080/api/animal/type
+Content-Type: application/json
+
+{
+  "name": "Обезьяна",
+  "attributes": {
+    "Окрас": [
+      "голубой",
+      "зеленый"
+    ]
+  },
+  "priority": 5
+}
