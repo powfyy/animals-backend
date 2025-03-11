@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/attribute")
@@ -31,7 +33,7 @@ public class AttributeController {
 
   @PostMapping
   @Operation(summary = "Сохранение атрибута")
-  public void save(@RequestBody AttributeDto dto) {
+  public void save(@RequestBody @Valid AttributeDto dto) {
     service.save(dto);
   }
 

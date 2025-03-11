@@ -2,12 +2,15 @@ server:
   port: 8080
   servlet:
     context-path: /api
+  error:
+    include-binding-errors: always
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/animals
-    username: admin
-    password: pass
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME:animals}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
   liquibase:
     change-log: classpath:db/db.changelog-master.xml
     drop-first: false
@@ -21,6 +24,6 @@ app:
   jwtExpirationMs: 86400000
 
 minio:
-  url: http://minio:9000
-  accessKey: minioadmin
-  secretKey: minioadmin
+  url: http://${MINIO_HOST}:${MINIO_PORT}
+  accessKey: ${MINIO_ACCESS_KEY}
+  secretKey: ${MINIO_SECRET_KEY}

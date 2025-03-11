@@ -21,7 +21,7 @@ public class AnimalPhotosEntity {
   String photoRef;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "animal_id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "animal_id", nullable = false)
   private AnimalEntity animal;
 
   public AnimalPhotosEntity(String photoRef, AnimalEntity animal) {

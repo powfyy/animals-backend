@@ -7,13 +7,13 @@
       ],
       "Effect": "Allow",
       "Principal": "*",
-      "Resource": "arn:aws:s3:::bucketName"
+      "Resource": "arn:aws:s3:::BUCKET_NAME_KEY"
     },
     {
       "Action": "s3:GetObject",
       "Effect": "Allow",
       "Principal": "*",
-      "Resource": "arn:aws:s3:::bucketName/*"
+      "Resource": "arn:aws:s3:::BUCKET_NAME_KEY/*"
     }
   ],
   "Version": "2012-10-17"

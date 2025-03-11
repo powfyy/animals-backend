@@ -2,12 +2,17 @@ package dev.animals.web.controller;
 
 import dev.animals.service.animal.AnimalService;
 import dev.animals.service.animal.AnimalTypeService;
+import dev.animals.web.dto.AnimalFilterDto;
+import dev.animals.web.dto.animal.AnimalDto;
+import dev.animals.web.dto.animal.AnimalSaveDto;
 import dev.animals.web.dto.animal.AnimalTypeDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +23,39 @@ public class AnimalController {
   private final AnimalService animalService;
   private final AnimalTypeService animalTypeService;
 
+  @GetMapping
+  @Operation(summary = "Получение животных")
+  public Page<AnimalDto> getAll(@RequestParam(required = false, defaultValue = "0") int page,
+                                @RequestParam(required = false, defaultValue = "15") int size) {
+    return animalService.getAll(page, size);
+  }
+
+  @PostMapping("/filter")
+  @Operation(summary = "Получение животных с фильтрацией")
+  public Page<AnimalDto> getFiltered(@RequestParam(required = false, defaultValue = "0") int page,
+                                     @RequestParam(required = false, defaultValue = "15") int size,
+                                     @RequestBody AnimalFilterDto filterDto) {
+    return animalService.getAllFiltered(page, size, filterDto);
+  }
+
+  @PostMapping
+  @Operation(summary = "Создание животного")
+  public AnimalDto create(@ModelAttribute @Valid AnimalSaveDto dto) {
+    return animalService.create(dto);
+  }
+
+  @PutMapping
+  @Operation(summary = "Обновление животного")
+  public AnimalDto update(@ModelAttribute @Valid AnimalSaveDto dto) {
+    return animalService.update(dto);
+  }
+
+  @DeleteMapping("/{id}")
+  @Operation(summary = "Удаление животного")
+  public void delete(@PathVariable Long id) {
+    animalService.delete(id);
+  }
+
   @GetMapping("/type")
   @Operation(summary = "Получение видов животных")
   public Page<AnimalTypeDto> getAllTypes(@RequestParam(required = false, defaultValue = "0") int page,
@@ -27,7 +65,7 @@ public class AnimalController {
 
   @PostMapping("/type")
   @Operation(summary = "Сохранение вида животного")
-  public void saveType(@RequestBody AnimalTypeDto dto) {
+  public void saveType(@RequestBody @Valid AnimalTypeDto dto) {
     animalTypeService.save(dto);
   }
 

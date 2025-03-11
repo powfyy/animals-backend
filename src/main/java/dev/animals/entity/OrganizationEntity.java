@@ -21,7 +21,7 @@ public class OrganizationEntity {
   private Long id;
 
   @Column(nullable = false)
-  private String nameOrganization;
+  private String name;
 
   @Column(nullable = false)
   private String city;
@@ -49,24 +49,24 @@ public class OrganizationEntity {
   private List<MessageEntity> messages = new ArrayList<>();
 
   public OrganizationEntity(Long id,
-                            String nameOrganization,
+                            String name,
                             String city,
                             String passportSeries,
                             String passportNumber,
                             String phoneNumber) {
     this.id = id;
-    this.nameOrganization = nameOrganization;
+    this.name = name;
     this.city = city;
     this.passportSeries = passportSeries;
     this.passportNumber = passportNumber;
     this.phoneNumber = phoneNumber;
   }
 
-  public OrganizationEntity(String nameOrganization,
+  public OrganizationEntity(String name,
                             String city,
                             String passportSeries,
                             String passportNumber,
                             String phoneNumber) {
-    this(null, nameOrganization, city, passportSeries, passportNumber, phoneNumber);
+    this(null, name, city, passportSeries, passportNumber, phoneNumber);
   }
 }

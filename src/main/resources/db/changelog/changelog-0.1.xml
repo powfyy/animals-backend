@@ -119,4 +119,19 @@
                                  constraintName="FK_ANIMAL_ATTRIBUTE_VALUES_ON_ANIMAL_TYPE_ATTRIBUTE_VALUES"/>
 
     </changeSet>
+
+    <changeSet id="09.03.2025" author="Dmitry Serebryansky">
+
+        <renameColumn tableName="organizations"
+                      oldColumnName="name_organization"
+                      newColumnName="name"/>
+
+    </changeSet>
+
+    <changeSet id="11.03.2025" author="Dmitry Serebryansky">
+
+        <addNotNullConstraint tableName="animals"
+                              columnName="organization_id"/>
+
+    </changeSet>
 </databaseChangeLog>

@@ -2,13 +2,10 @@ package dev.animals.web.controller;
 
 import dev.animals.service.OrganizationService;
 import dev.animals.service.animal.AnimalService;
-import dev.animals.web.dto.MessageResponse;
 import dev.animals.web.dto.OrganizationDto;
 import dev.animals.web.dto.UserDto;
 import dev.animals.web.dto.animal.AnimalDto;
-import dev.animals.web.dto.animal.AnimalSaveDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -44,33 +41,33 @@ public class ProfileeController {
     return animalService.getAllByOrganizationUsername(principal.getName());
   }
 
-  @PostMapping("/organization/pets")
-  public AnimalDto addPet(Principal principal, @Valid AnimalSaveDto newPetInfo) {
-    return animalService.create(principal.getName(), newPetInfo);
-  }
-
-  @PutMapping("/organization/pets/{id}")
-  public AnimalDto updatePet(@PathVariable("id") Long id, @Valid AnimalSaveDto dto) {
-    return animalService.update(id, dto);
-  }
-
-  @DeleteMapping("/organization/pets/{id}")
-  public void deletePet(@PathVariable("id") Long id) {
-    animalService.delete(id);
-  }
-
-  @PatchMapping("/organization/pets/{id}/status")
-  public ResponseEntity<?> updateStatusPet(@PathVariable("id") Long animalId,
-                                           @RequestParam(value = "newStatus") String newStatus) {
-    animalService.updateStatusPet(animalId, newStatus);
-    return ResponseEntity.ok().body(new MessageResponse("Status updated"));
-  }
-
-
-  @PostMapping("/organization/pets/{id}/adopt")
-  public void adoptPet(@PathVariable("id") Long animalId, @RequestBody String username) { //todo поправить username
-    animalService.adoptPet(username, animalId);
-  }
+//  @PostMapping("/organization/pets")
+//  public AnimalDto addPet(Principal principal, @Valid AnimalSaveDto newPetInfo) {
+//    return animalService.create(principal.getName(), newPetInfo);
+//  }
+//
+//  @PutMapping("/organization/pets/{id}")
+//  public AnimalDto updatePet(@PathVariable("id") Long id, @Valid AnimalSaveDto dto) {
+//    return animalService.update(id, dto);
+//  }
+//
+//  @DeleteMapping("/organization/pets/{id}")
+//  public void deletePet(@PathVariable("id") Long id) {
+//    animalService.delete(id);
+//  }
+//
+//  @PatchMapping("/organization/pets/{id}/status")
+//  public ResponseEntity<?> updateStatusPet(@PathVariable("id") Long animalId,
+//                                           @RequestParam(value = "newStatus") String newStatus) {
+//    animalService.updateStatusPet(animalId, newStatus);
+//    return ResponseEntity.ok().body(new MessageResponse("Status updated"));
+//  }
+//
+//
+//  @PostMapping("/organization/pets/{id}/adopt")
+//  public void adoptPet(@PathVariable("id") Long animalId, @RequestBody String username) { //todo поправить username
+//    animalService.adoptPet(username, animalId);
+//  }
 
   @GetMapping("/organization/pets/{id}/userRequest")
   public Set<UserDto> getUserRequests(@PathVariable("id") Long animalId) {

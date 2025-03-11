@@ -1,6 +1,5 @@
 package dev.animals.service;
 
-import dev.animals.entity.animal.AnimalPhotosEntity;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import io.minio.*;
@@ -9,16 +8,17 @@ import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,12 +28,16 @@ public class MinioService {
 
   private final MinioClient minioClient;
 
-  public void createBucket(String bucketName) {
+  private final String BUCKET_PREFIX = "animal-";
+  private final String POLICY_PATH = "minio/policy.json";
+  private final String POLICY_BUCKET_NAME_KEY = "BUCKET_NAME_KEY";
+
+  public void createBucket(String animalId) {
     try {
-      boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
-      if (!found) {
-        String policyJson = new String(Files.readAllBytes(Paths.get("/app/minioPolicy.json")));
-        policyJson = policyJson.replace("bucketName", bucketName);
+      String bucketName = BUCKET_PREFIX + animalId;
+      if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+        String policyJson = readPolicy();
+        policyJson = policyJson.replace(POLICY_BUCKET_NAME_KEY, bucketName);
         minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
         minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucketName).config(policyJson).build());
         log.info("bucket successfully created.");
@@ -43,11 +47,22 @@ public class MinioService {
     }
   }
 
-  public void uploadFile(ArrayList<MultipartFile> files, String bucketName) {
+  private String readPolicy() {
+    try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(POLICY_PATH)) {
+      if (Objects.isNull(inputStream)) {
+        throw new LogicException(CommonErrorCode.JAVA_ERROR, "Файл policy не найден: " + POLICY_PATH);
+      }
+      return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+    } catch (Exception ex) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR, "Ошибка при чтении policy: " + ex.getMessage());
+    }
+  }
+
+  public void uploadFile(List<MultipartFile> files, String bucketName) {
     files.forEach(file -> {
       try {
         minioClient.putObject(PutObjectArgs.builder()
-          .bucket(bucketName)
+          .bucket(BUCKET_PREFIX + bucketName)
           .object(file.getOriginalFilename())
           .stream(file.getInputStream(), file.getSize(), -1)
           .contentType(file.getContentType())
@@ -58,28 +73,22 @@ public class MinioService {
     });
   }
 
-  public void removeBucket(String bucketName) {
+  public boolean bucketExists(String name) {
+    if (StringUtils.isBlank(name)) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR, "Невозможно проверить существование бакета: передано пустое название");
+    }
     try {
-      minioClient.removeBucket(RemoveBucketArgs.builder().bucket(bucketName).build());
-    } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | MinioException e) {
-      throw new LogicException(CommonErrorCode.JAVA_ERROR, "Ошибка при удалении бакета: " + e.getMessage());
+      return minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_PREFIX + name).build());
+    } catch (Exception ex) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR, ex.getMessage());
     }
   }
 
-  public void removeFiles(String bucketName, List<AnimalPhotosEntity> petPhotos) {
+  public void removeBucket(String bucketName) {
     try {
-      List<DeleteObject> objects = petPhotos.stream()
-        .map(petPhoto -> new DeleteObject(petPhoto.getPhotoRef()))
-        .collect(Collectors.toList());
-      Iterable<Result<DeleteError>> results =
-        minioClient.removeObjects(
-          RemoveObjectsArgs.builder().bucket(bucketName).objects(objects).build());
-      for (Result<DeleteError> result : results) {
-        DeleteError error = result.get();
-        log.error("Error in deleting object {}; {}", error.objectName(), error.message());
-      }
-    } catch (InvalidKeyException | MinioException | IOException | NoSuchAlgorithmException e) {
-      throw new LogicException(CommonErrorCode.JAVA_ERROR, "Ошибка при удалении файлов: " + e.getMessage());
+      minioClient.removeBucket(RemoveBucketArgs.builder().bucket(BUCKET_PREFIX + bucketName).build());
+    } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | MinioException e) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR, "Ошибка при удалении бакета: " + e.getMessage());
     }
   }
 
@@ -90,7 +99,7 @@ public class MinioService {
         .collect(Collectors.toList());
       Iterable<Result<DeleteError>> results =
         minioClient.removeObjects(
-          RemoveObjectsArgs.builder().bucket(bucketName).objects(objects).build());
+          RemoveObjectsArgs.builder().bucket(BUCKET_PREFIX + bucketName).objects(objects).build());
       for (Result<DeleteError> result : results) {
         DeleteError error = result.get();
         throw new LogicException(CommonErrorCode.JAVA_ERROR, "Ошибка при удалении объектов:" + error.objectName());

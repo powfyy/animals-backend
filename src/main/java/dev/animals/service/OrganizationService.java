@@ -1,8 +1,6 @@
 package dev.animals.service;
 
-import dev.animals.entity.AuthEntity;
 import dev.animals.entity.OrganizationEntity;
-import dev.animals.enums.Role;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mapper.OrganizationMapper;
@@ -38,7 +36,7 @@ public class OrganizationService {
    * @return {@link OrganizationDto}
    */
   public OrganizationDto getByUsername(String username) {
-    return OrganizationMapper.MAPPER.toDTO(findByUsername(username));
+    return OrganizationMapper.MAPPER.toDto(findByUsername(username));
   }
 
   /**
@@ -65,15 +63,8 @@ public class OrganizationService {
     if (authService.existsByUsername(request.getUsername())) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно зарегистрировать организацию: логин занят");
     }
-    OrganizationEntity organization = new OrganizationEntity(
-      request.getNameOrganization(),
-      request.getCity(),
-      request.getPassportNumber(),
-      request.getPassportSeries(),
-      request.getPhoneNumber()
-    );
-    organization.setAuth(new AuthEntity(request.getUsername(), Role.ORG, passwordEncoder.encode(request.getPassword())));
-    return OrganizationMapper.MAPPER.toDTO(organizationRepository.save(organization));
+    request.setPassword(passwordEncoder.encode(request.getPassword()));
+    return OrganizationMapper.MAPPER.toDto(organizationRepository.save(OrganizationMapper.MAPPER.toEntity(request)));
   }
 
   /**
@@ -88,7 +79,7 @@ public class OrganizationService {
     }
     OrganizationEntity organization = findByUsername(dto.getUsername());
     OrganizationMapper.MAPPER.updateOrganization(dto, organization);
-    return OrganizationMapper.MAPPER.toDTO(organizationRepository.save(organization));
+    return OrganizationMapper.MAPPER.toDto(organizationRepository.save(organization));
   }
 
   /**

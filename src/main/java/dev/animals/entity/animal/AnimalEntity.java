@@ -2,8 +2,8 @@ package dev.animals.entity.animal;
 
 import dev.animals.entity.OrganizationEntity;
 import dev.animals.entity.UserEntity;
+import dev.animals.enums.AnimalStatus;
 import dev.animals.enums.GenderType;
-import dev.animals.enums.PetStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +11,6 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -40,21 +39,21 @@ public class AnimalEntity {
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  PetStatus status;
+  private AnimalStatus status;
 
   @ManyToOne
   @JoinColumn(name = "type", nullable = false)
   private AnimalTypeEntity type;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "user_id")
   private UserEntity user;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "organization_id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "organization_id", nullable = false)
   private OrganizationEntity organization;
 
-  @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<AnimalPhotosEntity> animalPhotos;
 
   @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL)
@@ -63,43 +62,4 @@ public class AnimalEntity {
   @ManyToMany(mappedBy = "animalSet")
   private Set<UserEntity> userSet = new HashSet<>();
 
-
-  public AnimalEntity(Long id,
-                      String name,
-                      GenderType gender,
-                      AnimalTypeEntity type,
-                      LocalDate birthDay,
-                      String breed,
-                      String description,
-                      PetStatus status) {
-    if (Objects.nonNull(breed)) {
-      this.breed = breed.toLowerCase();
-    }
-    this.id = id;
-    this.name = name;
-    this.gender = gender;
-    this.type = type;
-    this.birthDay = birthDay;
-    this.description = description;
-    this.status = status;
-  }
-
-  public AnimalEntity(String name,
-                      GenderType gender,
-                      AnimalTypeEntity type,
-                      LocalDate birthDay,
-                      String breed,
-                      String description,
-                      PetStatus status) {
-    if (Objects.nonNull(breed)) {
-      this.breed = breed.toLowerCase();
-    }
-    this.id = null;
-    this.name = name;
-    this.gender = gender;
-    this.type = type;
-    this.birthDay = birthDay;
-    this.description = description;
-    this.status = status;
-  }
 }

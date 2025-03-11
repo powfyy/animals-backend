@@ -42,7 +42,6 @@ public class AnimalTypeService {
    * Сохранение видов животных
    *
    * @param dto дто
-   * @return дто сохраненной сущности
    */
   public void save(AnimalTypeDto dto) {
     if (Objects.isNull(dto)) {
@@ -93,5 +92,11 @@ public class AnimalTypeService {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить вид животного: не найден вид с названием: " + name);
     }
     repository.deleteById(name.toLowerCase());
+  }
+
+  public AnimalTypeEntity findByName(String name) {
+    return repository.findByName(name.toLowerCase())
+      .orElseThrow(() -> new LogicException(CommonErrorCode.COMMON_OBJECT_NOT_EXISTS,
+        "Невозможно получить вид животного по названию: не найден вид с названием: " + name));
   }
 }

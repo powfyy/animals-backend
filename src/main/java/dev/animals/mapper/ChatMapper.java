@@ -15,13 +15,13 @@ public interface ChatMapper {
 
   @Mapping(source = "user.name", target = "userName")
   @Mapping(source = "user.auth.username", target = "userUsername")
-  @Mapping(source = "organization.nameOrganization", target = "organizationName")
+  @Mapping(source = "organization.name", target = "organizationName")
   @Mapping(source = "organization.auth.username", target = "organizationUsername")
   ChatDto toDto(ChatEntity chat);
 
   @Mapping(source = "user.name", target = "userName")
   @Mapping(source = "user.auth.username", target = "userUserName")
-  @Mapping(source = "organization.nameOrganization", target = "organizationName")
+  @Mapping(source = "organization.name", target = "organizationName")
   @Mapping(source = "user.name", target = "organizationUserName")
   List<ChatDto> toDtoList(List<ChatEntity> chats);
 }

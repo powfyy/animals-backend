@@ -1,20 +1,19 @@
 package dev.animals.service.animal;
 
+import dev.animals.entity.OrganizationEntity;
 import dev.animals.entity.UserEntity;
 import dev.animals.entity.animal.AnimalEntity;
-import dev.animals.entity.animal.AnimalPhotosEntity;
-import dev.animals.enums.PetStatus;
+import dev.animals.entity.animal.AnimalTypeEntity;
+import dev.animals.enums.AnimalStatus;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mapper.UserMapper;
 import dev.animals.mapper.animal.AnimalMapper;
-import dev.animals.repository.animal.AnimalPhotosRepository;
 import dev.animals.repository.animal.AnimalRepository;
 import dev.animals.repository.specification.PetSpecification;
-import dev.animals.service.MinioService;
 import dev.animals.service.OrganizationService;
 import dev.animals.service.UserService;
-import dev.animals.web.dto.FilterFields;
+import dev.animals.web.dto.AnimalFilterDto;
 import dev.animals.web.dto.UserDto;
 import dev.animals.web.dto.animal.AnimalDto;
 import dev.animals.web.dto.animal.AnimalSaveDto;
@@ -33,11 +32,23 @@ import java.util.*;
 @RequiredArgsConstructor
 public class AnimalService {
 
-  private final AnimalRepository animalRepository;
-  private final AnimalPhotosRepository animalPhotosRepository;
+  private final AnimalRepository repository;
+  private final AnimalTypeService typeService;
+  private final AnimalPhotoService photoService;
   private final OrganizationService organizationService;
   private final UserService userService;
-  private final MinioService minioService;
+
+  /**
+   * Получение животных
+   *
+   * @param page номер страницы
+   * @param size размер страницы
+   * @return отфильтрованный список
+   */
+  public Page<AnimalDto> getAll(int page, int size) {
+    return repository.findAll(PageRequest.of(page, size))
+      .map(AnimalMapper.MAPPER::toDto);
+  }
 
   /**
    * Получение животных с фильтрацией
@@ -47,8 +58,9 @@ public class AnimalService {
    * @param filterFields объект с полями фильтрации
    * @return отфильтрованный список
    */
-  public Page<AnimalDto> getAll(int page, int size, FilterFields filterFields) {
-    return animalRepository.findAll(new PetSpecification(filterFields), PageRequest.of(page, size)).map(AnimalMapper.MAPPER::toDto);
+  public Page<AnimalDto> getAllFiltered(int page, int size, AnimalFilterDto filterFields) {
+    return repository.findAll(new PetSpecification(filterFields), PageRequest.of(page, size))
+      .map(AnimalMapper.MAPPER::toDto);
   }
 
   /**
@@ -58,7 +70,7 @@ public class AnimalService {
    * @return список животных {@link AnimalDto}
    */
   public List<AnimalDto> getAllByOrganizationUsername(String username) {
-    return AnimalMapper.MAPPER.toDtoList(animalRepository.findByOrganizationUsername(username));
+    return AnimalMapper.MAPPER.toDtoList(repository.findByOrganizationUsername(username));
   }
 
   /**
@@ -81,7 +93,10 @@ public class AnimalService {
    * @return сущность животного
    */
   public AnimalEntity findById(Long id) {
-    return animalRepository.findById(id)
+    if (Objects.isNull(id)) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR, "Невозможно найти животного по id: переданный id равен null");
+    }
+    return repository.findById(id)
       .orElseThrow(() -> new LogicException(CommonErrorCode.COMMON_OBJECT_NOT_EXISTS,
         "Невозможно получить животное: не найдено животное с id: " + id));
   }
@@ -89,63 +104,66 @@ public class AnimalService {
   /**
    * Создание животного
    *
-   * @param organizationUsername логин организации
-   * @param dto                  dto животного
+   * @param dto dto животного
    * @return созданное животное
    */
-  @Transactional //todo пересмотреть метод
-  public AnimalDto create(String organizationUsername, AnimalSaveDto dto) {
-    AnimalEntity tempAnimal = AnimalMapper.MAPPER.toEntity(dto);
-    AnimalEntity newAnimal = new AnimalEntity(
-      tempAnimal.getName(),
-      tempAnimal.getGender(),
-      tempAnimal.getType(),
-      tempAnimal.getBirthDay(),
-      tempAnimal.getBreed(),
-      tempAnimal.getDescription(),
-      PetStatus.ACTIVE);
-    newAnimal.setOrganization(organizationService.findByUsername(organizationUsername));
-    animalRepository.save(newAnimal);
-    String bucketName = newAnimal.getId().toString() + "-" + newAnimal.getType().toString().toLowerCase();
-    minioService.createBucket(bucketName);
-    if (!dto.getFiles().isEmpty()) {
-      minioService.uploadFile(dto.getFiles(), bucketName);
-      List<AnimalPhotosEntity> petPhotosList = new ArrayList<>();
-      dto.getFiles().forEach(file -> {
-        AnimalPhotosEntity petPhotos = new AnimalPhotosEntity(file.getOriginalFilename(), newAnimal);
-        petPhotosList.add(petPhotos);
-      });
-      animalPhotosRepository.saveAll(petPhotosList);
+  @Transactional
+  public AnimalDto create(AnimalSaveDto dto) {
+    if (Objects.isNull(dto)) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно создать животное: переданный dto равен null");
     }
-    return AnimalMapper.MAPPER.toDto(newAnimal);
+    OrganizationEntity organization = organizationService.findByUsername(dto.getOrganizationUsername());
+    AnimalTypeEntity type = typeService.findByName(dto.getType());
+    AnimalEntity animal = AnimalMapper.MAPPER.toEntity(dto);
+    animal.setOrganization(organization);
+    animal.setType(type);
+    repository.save(animal);
+    photoService.save(animal, dto.getFiles());
+    return AnimalMapper.MAPPER.toDto(animal);
   }
 
   /**
    * Метод обновления данных животного
    *
-   * @param id  id животного
    * @param dto dto с обновленными данными
    * @return обновленное животное
    */
   @Transactional
-  public AnimalDto update(Long id, AnimalSaveDto dto) {
-    if (Objects.isNull(id) || Objects.isNull(dto)) {
-      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможного обновить данные животного: передан null в параметрах");
+  public AnimalDto update(AnimalSaveDto dto) {
+    if (Objects.isNull(dto) || Objects.isNull(dto.getId())) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможного обновить данные животного: переданный dto или id равен null");
     }
-    String bucketName = id + "-" + dto.getTypePet().toLowerCase();
-    AnimalEntity savedAnimal = findById(id);
-    if (!dto.getDeletedPhotoRefs().isEmpty()) {
-      minioService.removeFiles(dto.getDeletedPhotoRefs(), bucketName);
-      dto.getDeletedPhotoRefs().forEach(animalPhotosRepository::deleteByPhotoRef);
+    AnimalEntity savedAnimal = findById(dto.getId());
+    if (savedAnimal.getStatus().equals(AnimalStatus.ADOPTED)) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR, "Невозможно обновить данные животного: нельзя обновлять данные усыновленного животного");
     }
-    if (!dto.getFiles().isEmpty()) {
-      minioService.uploadFile(dto.getFiles(), bucketName);
-      List<AnimalPhotosEntity> petPhotosList = new ArrayList<>();
-      dto.getFiles().forEach(file -> petPhotosList.add(new AnimalPhotosEntity(file.getOriginalFilename(), savedAnimal)));
-      animalPhotosRepository.saveAll(petPhotosList);
+    updateStatus(savedAnimal, dto);
+    if (!savedAnimal.getType().getName().equals(dto.getType())) {
+      savedAnimal.setType(typeService.findByName(dto.getType()));
     }
-    AnimalMapper.MAPPER.updatePet(dto, savedAnimal);
-    return AnimalMapper.MAPPER.toDto(animalRepository.save(savedAnimal));
+    if (!savedAnimal.getOrganization().getAuth().getUsername().equals(dto.getOrganizationUsername())) {
+      savedAnimal.setOrganization(organizationService.findByUsername(dto.getOrganizationUsername()));
+    }
+    AnimalMapper.MAPPER.update(dto, savedAnimal);
+    photoService.remove(dto.getDeletedPhotoRefs(), savedAnimal.getId().toString());
+    photoService.save(savedAnimal, dto.getFiles());
+    return AnimalMapper.MAPPER.toDto(repository.save(savedAnimal));
+  }
+
+  private void updateStatus(AnimalEntity animal, AnimalSaveDto dto) {
+    if (Objects.isNull(dto.getStatus())) {
+      return;
+    }
+    if (!animal.getStatus().canTransitionTo(dto.getStatus())) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR,
+        String.format("Невозможно обновить статус животного: нельзя перевести животное в статус %s из %s",
+          dto.getStatus(), animal.getStatus())
+      );
+    }
+    if (dto.getStatus().equals(AnimalStatus.ADOPTED)) {
+      animal.setUser(userService.findByUsername(dto.getUserUsername()));
+      animal.getUserSet().clear();
+    }
   }
 
   /**
@@ -158,36 +176,10 @@ public class AnimalService {
     if (Objects.isNull(id)) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить животное: переданный id равен null");
     }
-    AnimalEntity animal = findById(id);
-    String bucketName = animal.getId() + "-" + animal.getType().toString().toLowerCase();
-    if (!animal.getAnimalPhotos().isEmpty()) {
-      minioService.removeFiles(bucketName, animal.getAnimalPhotos());
+    if (!repository.existsById(id)) {
+      throw new LogicException(CommonErrorCode.COMMON_OBJECT_NOT_EXISTS, "Невозможно удалить животное: не найдено животное с id: " + id);
     }
-    minioService.removeBucket(bucketName);
-    animalRepository.deleteById(id);
-    animalPhotosRepository.deleteByAnimalId(id); //todo фотки должны удаляться каскадно
-  }
-
-  /**
-   * Усыновление животного
-   *
-   * @param username логин пользователя
-   * @param animalId id животного
-   */
-  @Transactional
-  public void adoptPet(String username, Long animalId) {
-    if (StringUtils.isBlank(username) || Objects.isNull(animalId)) {
-      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно усыновить животное: передан пустой параметр");
-    }
-    AnimalEntity animal = findById(animalId);
-    if (animal.getStatus() != PetStatus.FREEZE) {
-      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно усыновить животное: животное не заморожено");
-    }
-    UserEntity user = userService.findByUsername(username);
-    animal.setUser(user);
-    animal.getUserSet().clear();
-    animal.setStatus(PetStatus.ADOPTED);
-    animalRepository.save(animal);
+    repository.deleteById(id);
   }
 
   /**
@@ -204,20 +196,6 @@ public class AnimalService {
     UserEntity user = userService.findByUsername(username);
     user.getAnimalSet().remove(findById(animalId));
     userService.save(user);
-  }
-
-  public void updateStatusPet(Long animalId, String newStatus) { //todo удалить метод. Сделать обновление статуса через обновление животного
-    if (Objects.isNull(animalId) || StringUtils.isBlank(newStatus)) {
-      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно обновить статус питомца: передан пустой параметр");
-    }
-    AnimalEntity updatedPet = findById(animalId);
-    if (updatedPet.getStatus().canTransitionTo(PetStatus.valueOf(newStatus))) {
-      updatedPet.setStatus(PetStatus.valueOf(newStatus));
-      animalRepository.save(updatedPet);
-    } else {
-      throw new LogicException(CommonErrorCode.VALIDATION_ERROR,
-        "Невозможно обновить статус питомца: текущий статус не может быть изменен на переданный");
-    }
   }
 
   /**
