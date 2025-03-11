@@ -3,6 +3,7 @@ package dev.animals.service.animal;
 import dev.animals.entity.OrganizationEntity;
 import dev.animals.entity.UserEntity;
 import dev.animals.entity.animal.AnimalEntity;
+import dev.animals.entity.animal.AnimalPhotosEntity;
 import dev.animals.entity.animal.AnimalTypeEntity;
 import dev.animals.enums.AnimalStatus;
 import dev.animals.exception.LogicException;
@@ -176,9 +177,10 @@ public class AnimalService {
     if (Objects.isNull(id)) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить животное: переданный id равен null");
     }
-    if (!repository.existsById(id)) {
-      throw new LogicException(CommonErrorCode.COMMON_OBJECT_NOT_EXISTS, "Невозможно удалить животное: не найдено животное с id: " + id);
-    }
+    AnimalEntity animal = findById(id);
+    photoService.removeBucket(animal.getAnimalPhotos().stream()
+      .map(AnimalPhotosEntity::getPhotoRef)
+      .toList(), animal.getId().toString());
     repository.deleteById(id);
   }
 
