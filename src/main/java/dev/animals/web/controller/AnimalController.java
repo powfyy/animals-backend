@@ -82,8 +82,8 @@ public class AnimalController {
     animalTypeService.save(dto);
   }
 
-  @PostMapping("/type/{name}")
-  @Operation(summary = "Сохранение вида животного")
+  @DeleteMapping("/type/{name}")
+  @Operation(summary = "Удаление вида животного")
   public void deleteType(@PathVariable String name) {
     animalTypeService.delete(name);
   }
