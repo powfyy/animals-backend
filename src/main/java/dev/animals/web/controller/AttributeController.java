@@ -37,9 +37,9 @@ public class AttributeController {
     service.save(dto);
   }
 
-  @DeleteMapping
+  @DeleteMapping("/{name}")
   @Operation(summary = "Удаление атрибута по названию")
-  public void delete(@RequestParam String name) {
+  public void delete(@PathVariable String name) {
     service.delete(name);
   }
 }
