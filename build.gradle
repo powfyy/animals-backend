@@ -21,6 +21,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
     //Lombok
     implementation 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
@@ -52,8 +53,6 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test:5.5.1'
     // common lang
     implementation 'org.apache.commons:commons-lang3:3.17.0'
-    //swagger
-    implementation 'io.swagger.core.v3:swagger-annotations:2.2.25'
 }
 
 tasks.named('test') {

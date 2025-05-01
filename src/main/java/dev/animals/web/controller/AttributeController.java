@@ -25,9 +25,9 @@ public class AttributeController {
     return service.getAll(page, size);
   }
 
-  @GetMapping("/name")
+  @GetMapping("/{name}")
   @Operation(summary = "Получение атрибута по названию")
-  public AttributeDto getByName(@RequestParam String name) {
+  public AttributeDto getByName(@PathVariable String name) {
     return service.getByName(name);
   }
 
