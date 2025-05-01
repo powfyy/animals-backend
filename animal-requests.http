@@ -15,84 +15,39 @@ Content-Type: application/json
 
 ### сохранение животных
 POST http://localhost:8080/api/animal
-Content-Type: multipart/form-data; boundary=WebAppBoundary
+Content-Type: application/json
 
---WebAppBoundary
-Content-Disposition: form-data; name="name"
-
-Кеша
---WebAppBoundary
-Content-Disposition: form-data; name="gender"
-
-M
---WebAppBoundary
-Content-Disposition: form-data; name="type"
-
-попугай
---WebAppBoundary
-Content-Disposition: form-data; name="birthDay"
-
-2025-03-08
---WebAppBoundary
-Content-Disposition: form-data; name="breed"
-
-Волнистый
---WebAppBoundary
-Content-Disposition: form-data; name="description"
-
-Самый красивый говорун
---WebAppBoundary
-Content-Disposition: form-data; name="organizationUsername"
-
-myanimals
---WebAppBoundary
-Content-Disposition: form-data; name="files"; filename="anyFile.jpg"
-Content-Type: image/jpeg
-
-<<< ./path/to/your/anyFile.jpg
---WebAppBoundary--
+{
+  "name": "Кеша",
+  "gender": "M",
+  "type": "попугай",
+  "birthDay": "2025-03-08",
+  "breed": "Волнистый",
+  "description": "Самый красивый говорун",
+  "organizationUsername": "myanimals",
+  "attributes": {
+    "Окрас": "Синий"
+  }
+}
 
 ### обновление животного
 PUT http://localhost:8080/api/animal
-Content-Type: multipart/form-data; boundary=WebAppBoundary
+Content-Type: application/json
 
---WebAppBoundary
-Content-Disposition: form-data; name="id"
-
-3
---WebAppBoundary
-Content-Disposition: form-data; name="name"
-
-Кеша
---WebAppBoundary
-Content-Disposition: form-data; name="gender"
-
-M
---WebAppBoundary
-Content-Disposition: form-data; name="type"
-
-попугай
---WebAppBoundary
-Content-Disposition: form-data; name="birthDay"
-
-2025-03-11
---WebAppBoundary
-Content-Disposition: form-data; name="breed"
-
-Волнистый
---WebAppBoundary
-Content-Disposition: form-data; name="description"
-
-Самый красивый говорун
---WebAppBoundary
-Content-Disposition: form-data; name="organizationUsername"
-
-myanimals
---WebAppBoundary
-Content-Disposition: form-data; name="status"
-
-ACTIVE
---WebAppBoundary
+{
+  "id": 5,
+  "name": "Кеша",
+  "gender": "M",
+  "status": "ACTIVE",
+  "type": "попугай",
+  "birthDay": "2025-03-08",
+  "breed": "Волнистый",
+  "description": "Самый красивый говорун",
+  "organizationUsername": "myanimals",
+  "attributes": {
+    "Окрас": "голубой"
+  }
+}
 
 ### удаление животного
 DELETE http://localhost:8080/api/animal/2

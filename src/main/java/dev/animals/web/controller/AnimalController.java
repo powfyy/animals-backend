@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -40,13 +41,13 @@ public class AnimalController {
 
   @PostMapping
   @Operation(summary = "Создание животного")
-  public AnimalDto create(@ModelAttribute @Valid AnimalSaveDto dto) {
+  public AnimalDto create(@RequestBody @Valid AnimalSaveDto dto) {
     return animalService.create(dto);
   }
 
   @PutMapping
   @Operation(summary = "Обновление животного")
-  public AnimalDto update(@ModelAttribute @Valid AnimalSaveDto dto) {
+  public AnimalDto update(@RequestBody @Valid AnimalSaveDto dto) {
     return animalService.update(dto);
   }
 
@@ -54,6 +55,18 @@ public class AnimalController {
   @Operation(summary = "Удаление животного")
   public void delete(@PathVariable Long id) {
     animalService.delete(id);
+  }
+
+  @PostMapping("/photo/{id}")
+  @Operation(summary = "Сохранение фотографии")
+  public void savePhoto(@PathVariable Long id, MultipartFile file) {
+    animalService.savePhoto(id, file);
+  }
+
+  @DeleteMapping("/photo/{id}")
+  @Operation(summary = "Удаление фотографии")
+  public void deletePhoto(@PathVariable Long id, @RequestParam String photoRef) {
+    animalService.removePhoto(id, photoRef);
   }
 
   @GetMapping("/type")

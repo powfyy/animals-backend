@@ -134,4 +134,13 @@
                               columnName="organization_id"/>
 
     </changeSet>
+
+    <changeSet id="14.03.2025" author="Dmitry Serebryansky">
+
+        <dropPrimaryKey tableName="animal_attribute_values" />
+
+        <addPrimaryKey tableName="animal_attribute_values"
+                       columnNames="animal_id, animal_type, attribute_name, attribute_value"
+                       constraintName="pk_animal_attribute_values" />
+    </changeSet>
 </databaseChangeLog>

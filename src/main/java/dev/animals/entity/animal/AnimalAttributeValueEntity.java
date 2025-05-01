@@ -21,9 +21,9 @@ public class AnimalAttributeValueEntity {
 
   @ManyToOne
   @JoinColumns({
-    @JoinColumn(name = "animal_type", insertable = false, updatable = false),
-    @JoinColumn(name = "attribute_name", insertable = false, updatable = false),
-    @JoinColumn(name = "attribute_value", insertable = false, updatable = false)
+    @JoinColumn(name = "animal_type", referencedColumnName = "type_name", insertable = false, updatable = false),
+    @JoinColumn(name = "attribute_name", referencedColumnName = "attribute_name", insertable = false, updatable = false),
+    @JoinColumn(name = "attribute_value", referencedColumnName = "attribute_value", insertable = false, updatable = false)
   })
   private AnimalTypeAttributeValueEntity typeAttribute;
 

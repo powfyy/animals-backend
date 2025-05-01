@@ -2,9 +2,11 @@ package dev.animals.service.animal;
 
 import dev.animals.entity.OrganizationEntity;
 import dev.animals.entity.UserEntity;
+import dev.animals.entity.animal.AnimalAttributeValueEntity;
 import dev.animals.entity.animal.AnimalEntity;
 import dev.animals.entity.animal.AnimalPhotosEntity;
 import dev.animals.entity.animal.AnimalTypeEntity;
+import dev.animals.entity.pk.animal.AnimalAttributeValuePK;
 import dev.animals.enums.AnimalStatus;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
@@ -24,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -115,11 +118,25 @@ public class AnimalService {
     }
     OrganizationEntity organization = organizationService.findByUsername(dto.getOrganizationUsername());
     AnimalTypeEntity type = typeService.findByName(dto.getType());
-    AnimalEntity animal = AnimalMapper.MAPPER.toEntity(dto);
-    animal.setOrganization(organization);
-    animal.setType(type);
+    dto.getAttributes().entrySet().stream()
+      .filter(entry -> type.getAttributes().stream()
+        .noneMatch(attribute ->
+          attribute.getId().getAttributeName().equalsIgnoreCase(entry.getKey()) && attribute.getId().getAttributeValue().equalsIgnoreCase(entry.getValue())))
+      .findAny()
+      .ifPresent(attr -> {
+        throw new LogicException(
+          CommonErrorCode.VALIDATION_ERROR,
+          String.format("Невозможно создать животное: передан некорректный атрибут для данного вида. Атрибут: %s, значение: %s", attr.getKey(), attr.getValue())
+        );
+      });
+    AnimalEntity animal = AnimalMapper.MAPPER.toEntity(dto, organization, type);
     repository.save(animal);
-    photoService.save(animal, dto.getFiles());
+    animal.getAttributeValues().addAll(dto.getAttributes().entrySet().stream()
+      .map(entry -> new AnimalAttributeValueEntity(
+        new AnimalAttributeValuePK(animal.getId(), type.getName(), entry.getKey().toLowerCase(), entry.getValue().toLowerCase())
+      ))
+      .toList());
+    repository.save(animal);
     return AnimalMapper.MAPPER.toDto(animal);
   }
 
@@ -138,16 +155,26 @@ public class AnimalService {
     if (savedAnimal.getStatus().equals(AnimalStatus.ADOPTED)) {
       throw new LogicException(CommonErrorCode.JAVA_ERROR, "Невозможно обновить данные животного: нельзя обновлять данные усыновленного животного");
     }
-    updateStatus(savedAnimal, dto);
+    AnimalTypeEntity type = typeService.findByName(dto.getType());
+    dto.getAttributes().entrySet().stream()
+      .filter(entry -> type.getAttributes().stream()
+        .noneMatch(attribute ->
+          attribute.getId().getAttributeName().equalsIgnoreCase(entry.getKey()) && attribute.getId().getAttributeValue().equalsIgnoreCase(entry.getValue())))
+      .findAny()
+      .ifPresent(attr -> {
+        throw new LogicException(
+          CommonErrorCode.VALIDATION_ERROR,
+          String.format("Невозможно обновить животное: передан некорректный атрибут для данного вида. Атрибут: %s, значение: %s", attr.getKey(), attr.getValue())
+        );
+      });
     if (!savedAnimal.getType().getName().equals(dto.getType())) {
-      savedAnimal.setType(typeService.findByName(dto.getType()));
+      savedAnimal.setType(type);
     }
+    updateStatus(savedAnimal, dto);
     if (!savedAnimal.getOrganization().getAuth().getUsername().equals(dto.getOrganizationUsername())) {
       savedAnimal.setOrganization(organizationService.findByUsername(dto.getOrganizationUsername()));
     }
     AnimalMapper.MAPPER.update(dto, savedAnimal);
-    photoService.remove(dto.getDeletedPhotoRefs(), savedAnimal.getId().toString());
-    photoService.save(savedAnimal, dto.getFiles());
     return AnimalMapper.MAPPER.toDto(repository.save(savedAnimal));
   }
 
@@ -182,6 +209,33 @@ public class AnimalService {
       .map(AnimalPhotosEntity::getPhotoRef)
       .toList(), animal.getId().toString());
     repository.deleteById(id);
+  }
+
+  /**
+   * Сохранение фото животного
+   *
+   * @param id id животного
+   * @param file фото
+   */
+  public void savePhoto(Long id, MultipartFile file) {
+    if (Objects.isNull(id) || Objects.isNull(file)) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR, "Невозможно сохранить фото: переданный id или file равен null");
+    }
+    photoService.save(findById(id), file);
+  }
+
+  /**
+   * Удаление фото животного
+   *
+   * @param id id животного
+   * @param photoRef ссылка на фото
+   */
+  public void removePhoto(Long id, String photoRef) {
+    if (Objects.isNull(id) || StringUtils.isBlank(photoRef)) {
+      throw new LogicException(CommonErrorCode.JAVA_ERROR,
+        String.format("Невозможно удалить фото: передан пустой параметр: id=%s, photoRef=%s", id, photoRef));
+    }
+    photoService.remove(id.toString(), photoRef);
   }
 
   /**

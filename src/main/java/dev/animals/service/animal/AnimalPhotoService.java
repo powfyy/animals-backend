@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -21,28 +20,18 @@ public class AnimalPhotoService {
   private final AnimalPhotosRepository repository;
   private final MinioService minioService;
 
-  public void save(AnimalEntity animal, List<MultipartFile> photos) {
+  public void save(AnimalEntity animal, MultipartFile photo) {
     String bucketName = animal.getId().toString();
     if (!minioService.bucketExists(bucketName)) {
       minioService.createBucket(bucketName);
     }
-    if (!photos.isEmpty()) {
-      minioService.uploadFile(photos, bucketName);
-      repository.saveAll(photos.stream()
-        .map(photo -> new AnimalPhotosEntity(photo.getOriginalFilename(), animal))
-        .toList());
-    }
+    minioService.uploadFile(List.of(photo), bucketName);
+    repository.save(new AnimalPhotosEntity(photo.getOriginalFilename(), animal));
   }
 
-  public void remove(List<String> fileNames, String animalId) {
-    if (Objects.isNull(fileNames)) {
-      throw new LogicException(CommonErrorCode.JAVA_ERROR,
-        "Невозможно удалить фото животного: переданный список названий файлов равен null");
-    }
-    if (!fileNames.isEmpty()) {
-      minioService.removeFiles(fileNames, animalId);
-      repository.deleteAllByPhotoRefIn(fileNames);
-    }
+  public void remove(String animalId, String fileName) {
+    minioService.removeFiles(List.of(fileName), animalId);
+    repository.deleteByPhotoRef(fileName);
   }
 
   public void removeBucket(List<String> fileNames, String animalId) {
@@ -50,7 +39,8 @@ public class AnimalPhotoService {
       throw new LogicException(CommonErrorCode.JAVA_ERROR, "Невозможно удалить бакет животного: передан пустой id");
     }
     if (!fileNames.isEmpty()) {
-      remove(fileNames, animalId);
+      minioService.removeFiles(fileNames, animalId);
+      repository.deleteAllByPhotoRefIn(fileNames);
     }
     minioService.removeBucket(animalId);
   }

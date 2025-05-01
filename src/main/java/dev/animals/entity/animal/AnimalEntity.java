@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -56,8 +57,8 @@ public class AnimalEntity {
   @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<AnimalPhotosEntity> animalPhotos;
 
-  @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL)
-  private List<AnimalAttributeValueEntity> attributeValues;
+  @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<AnimalAttributeValueEntity> attributeValues = new ArrayList<>();
 
   @ManyToMany(mappedBy = "animalSet")
   private Set<UserEntity> userSet = new HashSet<>();

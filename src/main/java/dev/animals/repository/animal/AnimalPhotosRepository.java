@@ -9,5 +9,7 @@ import java.util.Collection;
 @Repository
 public interface AnimalPhotosRepository extends JpaRepository<AnimalPhotosEntity, Long> {
 
+  void deleteByPhotoRef(String photoRef);
+
   void deleteAllByPhotoRefIn(Collection<String> photoRefs);
 }

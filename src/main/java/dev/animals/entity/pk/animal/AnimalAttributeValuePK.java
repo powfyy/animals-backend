@@ -17,6 +17,12 @@ public class AnimalAttributeValuePK implements Serializable {
   @Column(name = "animal_id")
   private Long animalId;
 
+  @Column(name = "animal_type")
+  private String animalType;
+
   @Column(name = "attribute_name")
   private String attributeName;
+
+  @Column(name = "attribute_value")
+  private String attributeValue;
 }
