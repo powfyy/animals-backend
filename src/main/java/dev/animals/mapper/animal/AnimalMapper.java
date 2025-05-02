@@ -16,6 +16,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Mapper
 public interface AnimalMapper {
@@ -27,7 +28,19 @@ public interface AnimalMapper {
   @Mapping(source = "organization.name", target = "organizationName")
   @Mapping(source = "organization.auth.username", target = "organizationUsername")
   @Mapping(source = "type.name", target = "type")
+  @Mapping(target = "attributes", ignore = true)
   AnimalDto toDto(AnimalEntity animal);
+
+  @AfterMapping
+  default void toDtoAfter(@MappingTarget AnimalDto target, AnimalEntity source) {
+    target.setAttributes(source.getAttributeValues().stream()
+      .map(AnimalAttributeValueEntity::getId)
+      .collect(Collectors.toMap(
+        AnimalAttributeValuePK::getAttributeName,
+        AnimalAttributeValuePK::getAttributeValue
+      ))
+    );
+  }
 
   List<AnimalDto> toDtoList(List<AnimalEntity> animal);
 
