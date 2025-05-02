@@ -47,7 +47,6 @@ public class AnimalTypeService {
     if (Objects.isNull(dto)) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно сохранить вид животного: переданный dto равен null");
     }
-    dto.setName(dto.getName().toLowerCase());
     dto.setAttributes(dto.getAttributes().entrySet().stream()
       .collect(Collectors.toMap(
         entry -> entry.getKey().toLowerCase(),
@@ -70,7 +69,7 @@ public class AnimalTypeService {
     }
     repository.save(AnimalTypeMapper.INSTANCE.update(
       dto,
-      repository.findByName(dto.getName())
+      repository.findByNameIgnoreCase(dto.getName())
         .map(savedType -> {
           savedType.getAttributes().clear();
           return savedType;
@@ -91,11 +90,11 @@ public class AnimalTypeService {
     if (!repository.existsById(name)) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить вид животного: не найден вид с названием: " + name);
     }
-    repository.deleteById(name.toLowerCase());
+    repository.deleteById(name);
   }
 
   public AnimalTypeEntity findByName(String name) {
-    return repository.findByName(name.toLowerCase())
+    return repository.findByNameIgnoreCase(name)
       .orElseThrow(() -> new LogicException(CommonErrorCode.COMMON_OBJECT_NOT_EXISTS,
         "Невозможно получить вид животного по названию: не найден вид с названием: " + name));
   }

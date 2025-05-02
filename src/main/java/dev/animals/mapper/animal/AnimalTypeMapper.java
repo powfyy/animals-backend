@@ -21,7 +21,6 @@ public interface AnimalTypeMapper {
   AnimalTypeMapper INSTANCE = Mappers.getMapper(AnimalTypeMapper.class);
 
   @Mapping(target = "attributes", ignore = true)
-  @Mapping(target = "name", expression = "java(org.apache.commons.lang3.StringUtils.capitalize(source.getName()))")
   AnimalTypeDto toDto(AnimalTypeEntity source);
 
   @AfterMapping

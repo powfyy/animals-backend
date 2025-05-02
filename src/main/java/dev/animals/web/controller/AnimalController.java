@@ -31,6 +31,12 @@ public class AnimalController {
     return animalService.getAll(page, size);
   }
 
+  @GetMapping("/{id}")
+  @Operation(summary = "Получение животного по id")
+  public AnimalDto getById(@PathVariable Long id) {
+    return animalService.getById(id);
+  }
+
   @PostMapping("/filter")
   @Operation(summary = "Получение животных с фильтрацией")
   public Page<AnimalDto> getFiltered(@RequestParam(required = false, defaultValue = "0") int page,

@@ -58,15 +58,17 @@ public interface AnimalMapper {
 
   @AfterMapping
   default void updateAfter(@MappingTarget AnimalEntity target, AnimalSaveDto source) {
-    if (Objects.nonNull(source.getStatus())) {
-      target.setStatus(source.getStatus());
+    if (Objects.nonNull(target.getId())) {
+      if (Objects.nonNull(source.getStatus())) {
+        target.setStatus(source.getStatus());
+      }
+      target.getAttributeValues().clear();
+      target.getAttributeValues().addAll(source.getAttributes().entrySet().stream()
+        .map(entry -> new AnimalAttributeValueEntity(
+          new AnimalAttributeValuePK(source.getId(), target.getType().getName(), entry.getKey().toLowerCase(), entry.getValue().toLowerCase())
+        ))
+        .toList());
     }
-    target.getAttributeValues().clear();
-    target.getAttributeValues().addAll(source.getAttributes().entrySet().stream()
-      .map(entry -> new AnimalAttributeValueEntity(
-        new AnimalAttributeValuePK(source.getId(), target.getType().getName(), entry.getKey().toLowerCase(), entry.getValue().toLowerCase())
-      ))
-      .toList());
   }
 
   default String mapPetPhotosToString(AnimalPhotosEntity petPhotos) {

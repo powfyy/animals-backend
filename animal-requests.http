@@ -50,4 +50,4 @@ Content-Type: application/json
 }
 
 ### удаление животного
-DELETE http://localhost:8080/api/animal/2
+DELETE http://localhost:8080/api/animal/5

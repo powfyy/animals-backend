@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface AnimalTypeRepository extends JpaRepository<AnimalTypeEntity, String> {
 
-  Optional<AnimalTypeEntity> findByName(String name);
+  Optional<AnimalTypeEntity> findByNameIgnoreCase(String name);
 }
