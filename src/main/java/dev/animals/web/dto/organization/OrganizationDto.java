@@ -1,4 +1,4 @@
-package dev.animals.web.dto;
+package dev.animals.web.dto.organization;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ public class OrganizationDto {
     @Size(min = 4, message = "username must be minimum 4 chars")
     private String username;
     @Size(min = 2, message = "name organization must be minimum 2 chars")
-    private String nameOrganization;
+    private String name;
     @Size(min = 2, message = "city must be minimum 2 chars")
     private String city;
     @Size(min = 4, max = 4, message = "passport series must be 4 chars")

@@ -2,9 +2,9 @@ package dev.animals.web.controller;
 
 import dev.animals.service.OrganizationService;
 import dev.animals.service.animal.AnimalService;
-import dev.animals.web.dto.OrganizationDto;
 import dev.animals.web.dto.UserDto;
 import dev.animals.web.dto.animal.AnimalDto;
+import dev.animals.web.dto.organization.OrganizationDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

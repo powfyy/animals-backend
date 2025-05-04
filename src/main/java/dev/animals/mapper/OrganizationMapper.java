@@ -2,13 +2,16 @@ package dev.animals.mapper;
 
 import dev.animals.entity.AuthEntity;
 import dev.animals.entity.OrganizationEntity;
-import dev.animals.web.dto.OrganizationCityNameDto;
-import dev.animals.web.dto.OrganizationDto;
-import dev.animals.web.dto.SignupOrganizationRequest;
+import dev.animals.web.dto.organization.OrganizationCityNameDto;
+import dev.animals.web.dto.organization.OrganizationDto;
+import dev.animals.web.dto.organization.OrganizationShortDto;
+import dev.animals.web.dto.organization.SignupOrganizationRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 @Mapper
 public interface OrganizationMapper {
@@ -28,6 +31,11 @@ public interface OrganizationMapper {
 
   @Mapping(source = "auth.username", target = "username")
   OrganizationDto toDto(OrganizationEntity organization);
+
+  @Mapping(target = "username", source = "auth.username")
+  OrganizationShortDto toShortDto(OrganizationEntity organization);
+
+  List<OrganizationShortDto> toShortDtoList(List<OrganizationEntity> organizations);
 
   OrganizationCityNameDto toDtoCityName(OrganizationEntity organization);
 

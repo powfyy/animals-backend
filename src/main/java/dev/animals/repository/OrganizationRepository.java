@@ -12,4 +12,6 @@ public interface OrganizationRepository extends JpaRepository<OrganizationEntity
   Optional<OrganizationEntity> findByAuthUsername(String username);
 
   void deleteByAuthUsername(String username);
+
+  boolean existsByAuthUsername(String username);
 }

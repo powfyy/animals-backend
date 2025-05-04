@@ -1,4 +1,4 @@
-package dev.animals.web.dto;
+package dev.animals.web.dto.animal;
 
 import dev.animals.enums.GenderType;
 import lombok.Data;

@@ -1,10 +1,15 @@
 package dev.animals.web.controller;
 
+import dev.animals.service.JwtService;
 import dev.animals.service.OrganizationService;
 import dev.animals.service.UserService;
 import dev.animals.service.auth.AuthDetailsImpl;
-import dev.animals.utils.JwtUtils;
-import dev.animals.web.dto.*;
+import dev.animals.web.dto.JwtResponse;
+import dev.animals.web.dto.LoginRequest;
+import dev.animals.web.dto.SignupUserRequest;
+import dev.animals.web.dto.UserDto;
+import dev.animals.web.dto.organization.OrganizationDto;
+import dev.animals.web.dto.organization.SignupOrganizationRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +35,7 @@ public class AuthorizationController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final OrganizationService organizationService;
-    private final JwtUtils jwtUtils;
+    private final JwtService jwtService;
 
     @PostMapping("/login")
     public JwtResponse authUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -41,7 +46,7 @@ public class AuthorizationController {
                         loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
+        String jwt = jwtService.generateJwtToken(authentication);
 
         AuthDetailsImpl authDetails = (AuthDetailsImpl) authentication.getPrincipal();
         String role = authDetails.getAuthorities().stream()

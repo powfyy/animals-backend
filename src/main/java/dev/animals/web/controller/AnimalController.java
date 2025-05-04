@@ -2,8 +2,8 @@ package dev.animals.web.controller;
 
 import dev.animals.service.animal.AnimalService;
 import dev.animals.service.animal.AnimalTypeService;
-import dev.animals.web.dto.AnimalFilterDto;
 import dev.animals.web.dto.animal.AnimalDto;
+import dev.animals.web.dto.animal.AnimalFilterDto;
 import dev.animals.web.dto.animal.AnimalSaveDto;
 import dev.animals.web.dto.animal.AnimalTypeDto;
 import io.swagger.v3.oas.annotations.Operation;

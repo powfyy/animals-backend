@@ -1,4 +1,4 @@
-package dev.animals.web.dto;
+package dev.animals.web.dto.organization;
 
 import lombok.Getter;
 import lombok.Setter;

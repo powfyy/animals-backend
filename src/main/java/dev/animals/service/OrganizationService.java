@@ -6,10 +6,12 @@ import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mapper.OrganizationMapper;
 import dev.animals.repository.OrganizationRepository;
 import dev.animals.service.auth.AuthService;
-import dev.animals.web.dto.OrganizationCityNameDto;
-import dev.animals.web.dto.OrganizationDto;
-import dev.animals.web.dto.SignupOrganizationRequest;
+import dev.animals.web.dto.organization.OrganizationCityNameDto;
+import dev.animals.web.dto.organization.OrganizationDto;
+import dev.animals.web.dto.organization.OrganizationShortDto;
+import dev.animals.web.dto.organization.SignupOrganizationRequest;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +27,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrganizationService {
 
-  private final OrganizationRepository organizationRepository;
+  private final OrganizationRepository repository;
   private final AuthService authService;
   private final PasswordEncoder passwordEncoder;
+
+  public List<OrganizationShortDto> getAll() {
+    return OrganizationMapper.MAPPER.toShortDtoList(repository.findAll());
+  }
 
   /**
    * Получение организации по логину
@@ -45,7 +51,7 @@ public class OrganizationService {
    * @return {@link OrganizationCityNameDto}
    */
   public List<OrganizationCityNameDto> getCityAndName() {
-    return organizationRepository.findAll().stream()
+    return repository.findAll().stream()
       .map(OrganizationMapper.MAPPER::toDtoCityName)
       .collect(Collectors.toList());
   }
@@ -64,7 +70,7 @@ public class OrganizationService {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно зарегистрировать организацию: логин занят");
     }
     request.setPassword(passwordEncoder.encode(request.getPassword()));
-    return OrganizationMapper.MAPPER.toDto(organizationRepository.save(OrganizationMapper.MAPPER.toEntity(request)));
+    return OrganizationMapper.MAPPER.toDto(repository.save(OrganizationMapper.MAPPER.toEntity(request)));
   }
 
   /**
@@ -79,7 +85,7 @@ public class OrganizationService {
     }
     OrganizationEntity organization = findByUsername(dto.getUsername());
     OrganizationMapper.MAPPER.updateOrganization(dto, organization);
-    return OrganizationMapper.MAPPER.toDto(organizationRepository.save(organization));
+    return OrganizationMapper.MAPPER.toDto(repository.save(organization));
   }
 
   /**
@@ -89,7 +95,14 @@ public class OrganizationService {
    */
   @Transactional
   public void deleteByUsername(String username) {
-    organizationRepository.deleteByAuthUsername(username);
+    if (StringUtils.isBlank(username)) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить организацию: передан пустой username");
+    }
+    if (!repository.existsByAuthUsername(username)) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR,
+        "Невозможно удалить организацию: не существует организации с username: " + username);
+    }
+    repository.deleteByAuthUsername(username);
   }
 
   /**
@@ -99,7 +112,7 @@ public class OrganizationService {
    * @return {@link OrganizationEntity} сущность организации
    */
   public OrganizationEntity findByUsername(String username) {
-    return organizationRepository.findByAuthUsername(username)
+    return repository.findByAuthUsername(username)
       .orElseThrow(() -> new LogicException(CommonErrorCode.COMMON_OBJECT_NOT_EXISTS,
         "Невозможно получить организацию: не найдена организация с логином: " + username));
   }

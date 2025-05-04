@@ -1,4 +1,4 @@
-package dev.animals.utils;
+package dev.animals.service;
 
 import dev.animals.service.auth.AuthDetailsImpl;
 import io.jsonwebtoken.Jwts;
@@ -6,12 +6,12 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
-@Component
-public class JwtUtils {
+@Service
+public class JwtService {
 
   @Value("${app.jwtSecret}")
   private String jwtSecret;
@@ -42,6 +42,6 @@ public class JwtUtils {
   }
 
   public String getUserNameFromJwtToken(String jwt) {
-    return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt).getBody().getSubject();
+    return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt.replace("Bearer ", "")).getBody().getSubject();
   }
 }

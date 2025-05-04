@@ -1,10 +1,10 @@
-package dev.animals.web.dto;
+package dev.animals.web.dto.organization;
 
 import lombok.Data;
 
 @Data
 public class OrganizationCityNameDto {
 
-  private String nameOrganization;
+  private String name;
     private String city;
 }

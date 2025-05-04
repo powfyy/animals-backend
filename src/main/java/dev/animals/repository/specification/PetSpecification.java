@@ -4,7 +4,7 @@ import dev.animals.entity.OrganizationEntity;
 import dev.animals.entity.animal.AnimalEntity;
 import dev.animals.entity.animal.AnimalTypeEntity;
 import dev.animals.enums.AnimalStatus;
-import dev.animals.web.dto.AnimalFilterDto;
+import dev.animals.web.dto.animal.AnimalFilterDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
