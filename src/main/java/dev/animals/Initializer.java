@@ -94,6 +94,8 @@ public class Initializer {
 
       animalService.savePhoto(saved.getId(), getResourceFile("/initializer/kesha.png"));
       animalService.savePhoto(saved.getId(), getResourceFile("/initializer/kesha2.png"));
+
+
     }
   }
 

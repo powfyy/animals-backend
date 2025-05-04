@@ -13,7 +13,7 @@ import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mapper.UserMapper;
 import dev.animals.mapper.animal.AnimalMapper;
 import dev.animals.repository.animal.AnimalRepository;
-import dev.animals.repository.specification.PetSpecification;
+import dev.animals.repository.specification.AnimalSpecification;
 import dev.animals.service.OrganizationService;
 import dev.animals.service.UserService;
 import dev.animals.web.dto.UserDto;
@@ -63,7 +63,7 @@ public class AnimalService {
    * @return отфильтрованный список
    */
   public Page<AnimalDto> getAllFiltered(int page, int size, AnimalFilterDto filterFields) {
-    return repository.findAll(new PetSpecification(filterFields), PageRequest.of(page, size))
+    return repository.findAll(new AnimalSpecification(filterFields), PageRequest.of(page, size))
       .map(AnimalMapper.MAPPER::toDto);
   }
 
