@@ -1,5 +1,6 @@
 package dev.animals.web.dto.animal;
 
+import dev.animals.enums.GenderType;
 import lombok.Data;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public class AnimalDto {
 
   private Long id;
   private String name;
-  private String gender;
+  private GenderType gender;
   private String type;
   private String birthDay;
   private String breed;

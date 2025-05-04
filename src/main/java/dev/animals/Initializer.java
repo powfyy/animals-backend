@@ -91,12 +91,26 @@ public class Initializer {
       dto.setOrganizationUsername("myanimals");
       dto.setAttributes(Map.of("окрас", "голубой"));
       AnimalDto saved = animalService.create(dto);
+      animalService.update(toSaveDto(saved));
 
       animalService.savePhoto(saved.getId(), getResourceFile("/initializer/kesha.png"));
       animalService.savePhoto(saved.getId(), getResourceFile("/initializer/kesha2.png"));
-
-
     }
+  }
+
+  private AnimalSaveDto toSaveDto(AnimalDto animalDto) {
+    AnimalSaveDto saveDto = new AnimalSaveDto();
+    saveDto.setId(animalDto.getId());
+    saveDto.setName(animalDto.getName());
+    saveDto.setGender(animalDto.getGender());
+    saveDto.setType(animalDto.getType());
+    saveDto.setBirthDay(LocalDate.parse(animalDto.getBirthDay()));
+    saveDto.setBreed(animalDto.getBreed());
+    saveDto.setStatus(AnimalStatus.ACTIVE);
+    saveDto.setDescription(animalDto.getDescription());
+    saveDto.setOrganizationUsername(animalDto.getOrganizationUsername());
+    saveDto.setAttributes(animalDto.getAttributes());
+    return saveDto;
   }
 
   public MultipartFile getResourceFile(String pathInResources) {
