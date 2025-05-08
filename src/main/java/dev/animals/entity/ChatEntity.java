@@ -32,7 +32,7 @@ public class ChatEntity {
   @JoinColumn(name = "organization_id", nullable = false)
   private OrganizationEntity organization;
 
-  @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
   private List<MessageEntity> messages = new ArrayList<>();
 
   public ChatEntity(OrganizationEntity organization, UserEntity user) {
