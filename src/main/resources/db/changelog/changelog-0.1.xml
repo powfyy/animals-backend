@@ -143,4 +143,16 @@
                        columnNames="animal_id, animal_type, attribute_name, attribute_value"
                        constraintName="pk_animal_attribute_values" />
     </changeSet>
+
+
+    <changeSet id="08.05.2025" author="Dmitry Serebryansky">
+
+        <addColumn tableName="chats">
+            <column name="last_message_text" type="VARCHAR"/>
+        </addColumn>
+        <addColumn tableName="chats">
+            <column name="last_message_date" type="TIMESTAMP" />
+        </addColumn>
+
+    </changeSet>
 </databaseChangeLog>

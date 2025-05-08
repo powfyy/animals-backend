@@ -65,6 +65,8 @@ public class MessageService {
     }
     newMessage.setChat(chat);
     messageRepository.save(newMessage);
+    chat.setLastMessageDate(newMessage.getDate());
+    chat.setLastMessageText(newMessage.getMessage());
   }
 
   /**

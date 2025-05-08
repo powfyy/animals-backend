@@ -1,6 +1,9 @@
 package dev.animals;
 
-import dev.animals.entity.*;
+import dev.animals.entity.AuthEntity;
+import dev.animals.entity.ChatEntity;
+import dev.animals.entity.OrganizationEntity;
+import dev.animals.entity.UserEntity;
 import dev.animals.enums.AnimalStatus;
 import dev.animals.enums.GenderType;
 import dev.animals.enums.Role;
@@ -15,7 +18,10 @@ import dev.animals.service.OrganizationService;
 import dev.animals.service.UserService;
 import dev.animals.service.animal.AnimalService;
 import dev.animals.service.animal.AnimalTypeService;
+import dev.animals.service.chat.ChatService;
+import dev.animals.service.chat.MessageService;
 import dev.animals.web.dto.AttributeDto;
+import dev.animals.web.dto.MessageDto;
 import dev.animals.web.dto.SignupUserRequest;
 import dev.animals.web.dto.animal.AnimalDto;
 import dev.animals.web.dto.animal.AnimalSaveDto;
@@ -54,6 +60,9 @@ public class Initializer {
   private final PasswordEncoder passwordEncoder;
 
   private final ChatRepository chatRepository;
+  private final ChatService chatService;
+
+  private final MessageService messageService;
 
   @Transactional
   public void initial() {
@@ -136,12 +145,10 @@ public class Initializer {
       OrganizationEntity organization = organizationService.findByUsername("myanimals");
       chat.setOrganization(organization);
       chat = chatRepository.save(chat);
-      MessageEntity message = new MessageEntity();
-      message.setUser(user);
+      MessageDto message = new MessageDto();
+      message.setChatId(chat.getId());
       message.setMessage("Приветствую!");
-      message.setChat(chat);
-      chat.getMessages().add(message);
-      chatRepository.save(chat);
+      messageService.create(message, "user");
     }
   }
 

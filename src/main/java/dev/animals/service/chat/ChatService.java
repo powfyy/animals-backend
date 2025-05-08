@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -33,7 +34,10 @@ public class ChatService {
    * @return отсортированный список чатов
    */
   public Page<ChatDto> getAll(int page, int size, String username) {
-    return chatRepository.findChatsByUsername(username, PageRequest.of(page, size))
+    return chatRepository.findAllByUsername(
+        username,
+        PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, ChatEntity.Fields.lastMessageDate))
+      )
       .map(ChatMapper.MAPPER::toDto);
   }
 

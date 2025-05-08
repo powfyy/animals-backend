@@ -2,11 +2,14 @@ package dev.animals.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class MessageDto {
 
@@ -19,4 +22,5 @@ public class MessageDto {
   private String organizationUsername;
   private String userUsername;
   private String senderName;
+  private LocalDateTime date;
 }
