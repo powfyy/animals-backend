@@ -23,10 +23,15 @@ public class ChatController {
   private final MessageService messageService;
 
   @GetMapping
-  public Page<ChatDto> getChats(@RequestParam(required = false, defaultValue = "0") int page,
+  public Page<ChatDto> getAll(@RequestParam(required = false, defaultValue = "0") int page,
                                 @RequestParam(required = false, defaultValue = "35") int size,
                                 Principal principal) {
     return chatService.getAll(page, size, principal.getName());
+  }
+
+  @GetMapping(value = "/{id}")
+  public ChatDto getById(@PathVariable("id") Long id, Principal principal) {
+    return chatService.getByIdAndUsername(id, principal.getName());
   }
 
   @GetMapping(value = "/message/{id}/")

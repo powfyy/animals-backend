@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -17,15 +18,15 @@ public class ChatEntity {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "organization_id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "organization_id", nullable = false)
   private OrganizationEntity organization;
 
   @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
-  private List<MessageEntity> messages;
+  private List<MessageEntity> messages = new ArrayList<>();
 
   public ChatEntity(OrganizationEntity organization, UserEntity user) {
     this.organization = organization;

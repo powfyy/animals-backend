@@ -27,15 +27,15 @@ public class MessageEntity {
   private LocalDateTime date;
 
   @ManyToOne
-  @JoinColumn(name = "chat_id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "chat_id", nullable = false)
   private ChatEntity chat;
 
   @ManyToOne
-  @JoinColumn(name = "organization_id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "organization_id", nullable = false)
   private OrganizationEntity organization;
 
   @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
 
   public MessageEntity(Long id, String message, ChatEntity chat) {

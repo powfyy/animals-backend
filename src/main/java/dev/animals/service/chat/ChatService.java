@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -34,10 +33,26 @@ public class ChatService {
    * @return отсортированный список чатов
    */
   public Page<ChatDto> getAll(int page, int size, String username) {
-    return chatRepository.findChatsByUsername(
-        username,
-        PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateLastMessage"))) //todo сделать сортировку без поля dateLastMessage
+    return chatRepository.findChatsByUsername(username, PageRequest.of(page, size))
       .map(ChatMapper.MAPPER::toDto);
+  }
+
+  /**
+   * Получение по id и username
+   *
+   * @param id       id чата
+   * @param username username участника
+   * @return dto
+   */
+  public ChatDto getByIdAndUsername(Long id, String username) {
+    if (Objects.isNull(id) || StringUtils.isBlank(username)) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR,
+        String.format("Невозможно получить чат по id: не передан обязательный параметр: id=%s, username=%s", id, username));
+    }
+    return ChatMapper.MAPPER.toDto(chatRepository.findByIdAndUsername(id, username)
+      .orElseThrow(() -> new LogicException(CommonErrorCode.COMMON_OBJECT_NOT_EXISTS,
+        String.format("Не найден чат с id %s для пользователя %s", id, username))
+      ));
   }
 
   /**

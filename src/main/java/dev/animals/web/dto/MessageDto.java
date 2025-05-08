@@ -10,12 +10,13 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class MessageDto {
 
-    @NotNull(message = "message can't be null")
-    @NotBlank(message = "message can't be empty")
-    private String message;
+  @NotNull(message = "message can't be null")
+  @NotBlank(message = "message can't be empty")
+  private String message;
 
   @NotNull(message = "chatId can't be null")
-    private Long chatId;
-    private String organizationUsername;
-    private String userUsername;
+  private Long chatId;
+  private String organizationUsername;
+  private String userUsername;
+  private String senderName;
 }

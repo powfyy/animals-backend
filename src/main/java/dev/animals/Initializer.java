@@ -1,10 +1,10 @@
 package dev.animals;
 
-import dev.animals.entity.AuthEntity;
-import dev.animals.entity.UserEntity;
+import dev.animals.entity.*;
 import dev.animals.enums.AnimalStatus;
 import dev.animals.enums.GenderType;
 import dev.animals.enums.Role;
+import dev.animals.repository.ChatRepository;
 import dev.animals.repository.OrganizationRepository;
 import dev.animals.repository.UserRepository;
 import dev.animals.repository.animal.AnimalRepository;
@@ -12,9 +12,11 @@ import dev.animals.repository.animal.AnimalTypeRepository;
 import dev.animals.repository.attribute.AttributeRepository;
 import dev.animals.service.AttributeService;
 import dev.animals.service.OrganizationService;
+import dev.animals.service.UserService;
 import dev.animals.service.animal.AnimalService;
 import dev.animals.service.animal.AnimalTypeService;
 import dev.animals.web.dto.AttributeDto;
+import dev.animals.web.dto.SignupUserRequest;
 import dev.animals.web.dto.animal.AnimalDto;
 import dev.animals.web.dto.animal.AnimalSaveDto;
 import dev.animals.web.dto.animal.AnimalTypeDto;
@@ -48,7 +50,10 @@ public class Initializer {
   private final AnimalService animalService;
 
   private final UserRepository userRepository;
+  private final UserService userService;
   private final PasswordEncoder passwordEncoder;
+
+  private final ChatRepository chatRepository;
 
   @Transactional
   public void initial() {
@@ -104,6 +109,16 @@ public class Initializer {
       animalService.savePhoto(saved.getId(), getResourceFile("/initializer/kesha2.png"));
     }
 
+    if (userRepository.count() == 0) {
+      SignupUserRequest request = new SignupUserRequest();
+      request.setUsername("user");
+      request.setPassword("1234");
+      request.setName("Глеб");
+      request.setLastname("Акимочкин");
+      request.setPhoneNumber("79003332211");
+      userService.create(request);
+    }
+
     if (!userRepository.existsByAuthRole(Role.ADMIN)) {
       AuthEntity auth = new AuthEntity("admin", Role.ADMIN, passwordEncoder.encode("admin"));
       UserEntity userEntity = new UserEntity();
@@ -112,6 +127,21 @@ public class Initializer {
       userEntity.setPhoneNumber("70000000000");
       userEntity.setAuth(auth);
       userRepository.save(userEntity);
+    }
+
+    if (chatRepository.count() == 0) {
+      ChatEntity chat = new ChatEntity();
+      UserEntity user = userService.findByUsername("user");
+      chat.setUser(user);
+      OrganizationEntity organization = organizationService.findByUsername("myanimals");
+      chat.setOrganization(organization);
+      chat = chatRepository.save(chat);
+      MessageEntity message = new MessageEntity();
+      message.setUser(user);
+      message.setMessage("Приветствую!");
+      message.setChat(chat);
+      chat.getMessages().add(message);
+      chatRepository.save(chat);
     }
   }
 
