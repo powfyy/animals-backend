@@ -28,14 +28,14 @@ public class UserEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @JoinColumn(name = "auth_id", nullable = false)
+    @JoinColumn(name = "auth_username", nullable = false)
     @OneToOne(cascade = CascadeType.ALL)
     private AuthEntity auth;
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinTable(name = "user_animal",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "pet_id"))
+            inverseJoinColumns = @JoinColumn(name = "animal_id"))
     private Set<AnimalEntity> animalSet = new HashSet<>();
 
     @OneToMany (mappedBy = "user",cascade = CascadeType.ALL)

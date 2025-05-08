@@ -1,8 +1,12 @@
 package dev.animals;
 
+import dev.animals.entity.AuthEntity;
+import dev.animals.entity.UserEntity;
 import dev.animals.enums.AnimalStatus;
 import dev.animals.enums.GenderType;
+import dev.animals.enums.Role;
 import dev.animals.repository.OrganizationRepository;
+import dev.animals.repository.UserRepository;
 import dev.animals.repository.animal.AnimalRepository;
 import dev.animals.repository.animal.AnimalTypeRepository;
 import dev.animals.repository.attribute.AttributeRepository;
@@ -17,6 +21,7 @@ import dev.animals.web.dto.animal.AnimalTypeDto;
 import dev.animals.web.dto.organization.SignupOrganizationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +46,9 @@ public class Initializer {
 
   private final AnimalRepository animalRepository;
   private final AnimalService animalService;
+
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Transactional
   public void initial() {
@@ -86,7 +94,6 @@ public class Initializer {
       dto.setType("Попугай");
       dto.setBirthDay(LocalDate.now().minusDays(15));
       dto.setBreed("Волнистый");
-      dto.setStatus(AnimalStatus.ACTIVE);
       dto.setDescription("Самый красивый говорун");
       dto.setOrganizationUsername("myanimals");
       dto.setAttributes(Map.of("окрас", "голубой"));
@@ -95,6 +102,16 @@ public class Initializer {
 
       animalService.savePhoto(saved.getId(), getResourceFile("/initializer/kesha.png"));
       animalService.savePhoto(saved.getId(), getResourceFile("/initializer/kesha2.png"));
+    }
+
+    if (!userRepository.existsByAuthRole(Role.ADMIN)) {
+      AuthEntity auth = new AuthEntity("admin", Role.ADMIN, passwordEncoder.encode("admin"));
+      UserEntity userEntity = new UserEntity();
+      userEntity.setName("Admin");
+      userEntity.setLastname("Admin");
+      userEntity.setPhoneNumber("70000000000");
+      userEntity.setAuth(auth);
+      userRepository.save(userEntity);
     }
   }
 
