@@ -3,6 +3,7 @@ package dev.animals.entity.attribute;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.*;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldNameConstants
 @Table(name = "attributes")
 public class AttributeEntity {
 

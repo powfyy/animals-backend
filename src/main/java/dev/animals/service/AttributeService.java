@@ -14,11 +14,15 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +40,7 @@ public class AttributeService {
    * @return список атрибутов
    */
   public Page<AttributeDto> getAll(int page, int size) {
-    return AttributeMapper.INSTANCE.toDtoPage(repository.findAll(PageRequest.of(page, size)));
+    return AttributeMapper.INSTANCE.toDtoPage(repository.findAll(PageRequest.of(page, size, Sort.by(AttributeEntity.Fields.priority).ascending())));
   }
 
   /**
@@ -72,6 +76,29 @@ public class AttributeService {
     });
     repository.save(AttributeMapper.INSTANCE.toEntity(dto));
   }
+
+  @Transactional
+  public void updatePriorities(List<AttributeDto> dtos) {
+    if (Objects.isNull(dtos) || dtos.isEmpty()) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно обновить приоритеты атрибутов: список атрибутов пуст или null");
+    }
+    List<String> names = dtos.stream()
+      .map(AttributeDto::getName)
+      .collect(Collectors.toList());
+    List<AttributeEntity> entities = repository.findAllById(names);
+    Map<String, AttributeDto> dtoMap = dtos.stream()
+      .collect(Collectors.toMap(AttributeDto::getName, dto -> dto));
+    repository.saveAll(entities.stream()
+      .peek(entity -> {
+        AttributeDto dto = dtoMap.get(entity.getName());
+        if (Objects.nonNull(dto)) {
+          entity.setPriority(dto.getPriority());
+        }
+      })
+      .toList()
+    );
+  }
+
 
   /**
    * Удаление атрибута по названию

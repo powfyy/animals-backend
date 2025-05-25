@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,6 +79,28 @@ public class AnimalTypeService {
         })
         .orElse(new AnimalTypeEntity())
     ));
+  }
+
+  public void updatePriorities(List<AnimalTypeDto> dtos) {
+    if (Objects.isNull(dtos) || dtos.isEmpty()) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR,
+        "Невозможно обновить приоритеты видов животных: список вида пуст или null");
+    }
+    List<String> names = dtos.stream()
+      .map(AnimalTypeDto::getName)
+      .collect(Collectors.toList());
+    List<AnimalTypeEntity> entities = repository.findAllById(names);
+    Map<String, AnimalTypeDto> dtoMap = dtos.stream()
+      .collect(Collectors.toMap(AnimalTypeDto::getName, dto -> dto));
+    repository.saveAll(entities.stream()
+      .peek(entity -> {
+        AnimalTypeDto dto = dtoMap.get(entity.getName());
+        if (Objects.nonNull(dto)) {
+          entity.setPriority(dto.getPriority());
+        }
+      })
+      .toList()
+    );
   }
 
   /**

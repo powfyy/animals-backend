@@ -2,6 +2,7 @@ package dev.animals.web.dto.animal;
 
 import lombok.Data;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -13,6 +14,7 @@ public class AnimalTypeDto implements AnimalTypeDtoValidator {
 
   @NotBlank(message = "{animal.type.name.notblank.error}")
   private String name;
+  @Min(value = 0, message = "{animal.type.priority.min.error}")
   @NotNull(message = "{animal.type.priority.notnull.error}")
   private Integer priority;
 

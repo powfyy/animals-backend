@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -86,6 +87,12 @@ public class AnimalController {
   @Operation(summary = "Сохранение вида животного")
   public void saveType(@RequestBody @Valid AnimalTypeDto dto) {
     animalTypeService.save(dto);
+  }
+
+  @PutMapping("/priority")
+  @Operation(summary = "Обновление приоритетов видов животных")
+  public void updateTypePriorities(@RequestBody @Valid List<AnimalTypeDto> dtos) {
+    animalTypeService.updatePriorities(dtos);
   }
 
   @DeleteMapping("/type/{name}")
