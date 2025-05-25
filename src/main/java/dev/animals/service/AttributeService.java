@@ -6,6 +6,7 @@ import dev.animals.entity.pk.animal.AttributeValuePK;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mapper.AttributeMapper;
+import dev.animals.repository.animal.AnimalTypeAttributeValueRepository;
 import dev.animals.repository.attribute.AttributeRepository;
 import dev.animals.repository.attribute.AttributeValueRepository;
 import dev.animals.web.dto.AttributeDto;
@@ -25,6 +26,7 @@ public class AttributeService {
 
   private final AttributeRepository repository;
   private final AttributeValueRepository valueRepository;
+  private final AnimalTypeAttributeValueRepository animalTypeAttributeValueRepository;
 
   /**
    * Получение атрибутов
@@ -59,6 +61,15 @@ public class AttributeService {
     if (Objects.isNull(dto)) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно сохранить атрибут: dto равен null");
     }
+    repository.findById(dto.getName().toLowerCase()).flatMap(attribute -> attribute.getValues().stream()
+      .filter(value -> !dto.getValues().contains(value.getValue()))
+      .findAny()).ifPresent(value -> {
+      if (animalTypeAttributeValueRepository.existsByAttributeNameAndAttributeValue(value.getValue(), value.getAttributeName())) {
+        throw new LogicException(CommonErrorCode.VALIDATION_ERROR,
+          String.format("Невозможно сохранить атрибут: значение '%s' атрибута '%s' используется у вида животного",
+            value.getValue(), value.getAttributeName()));
+      }
+    });
     repository.save(AttributeMapper.INSTANCE.toEntity(dto));
   }
 
