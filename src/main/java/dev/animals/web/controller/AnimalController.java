@@ -89,7 +89,7 @@ public class AnimalController {
     animalTypeService.save(dto);
   }
 
-  @PutMapping("/priority")
+  @PutMapping("/type/priority")
   @Operation(summary = "Обновление приоритетов видов животных")
   public void updateTypePriorities(@RequestBody @Valid List<AnimalTypeDto> dtos) {
     animalTypeService.updatePriorities(dtos);

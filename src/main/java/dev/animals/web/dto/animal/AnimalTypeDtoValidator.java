@@ -18,7 +18,7 @@ public interface AnimalTypeDtoValidator {
     return Objects.isNull(getAttributes()) ||
       getAttributes().isEmpty() ||
       getAttributes().entrySet().stream()
-        .anyMatch(entry -> entry.getValue().isEmpty() || entry.getValue().stream()
-          .anyMatch(StringUtils::isBlank));
+        .allMatch(entry -> !entry.getValue().isEmpty() && entry.getValue().stream()
+          .allMatch(StringUtils::isNotBlank));
   }
 }

@@ -9,6 +9,7 @@ import dev.animals.service.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -29,11 +30,13 @@ public class AnimalPhotoService {
     repository.save(new AnimalPhotosEntity(photo.getOriginalFilename(), animal));
   }
 
+  @Transactional
   public void remove(String animalId, String fileName) {
     minioService.removeFiles(List.of(fileName), animalId);
     repository.deleteByPhotoRef(fileName);
   }
 
+  @Transactional
   public void removeBucket(List<String> fileNames, String animalId) {
     if (StringUtils.isBlank(animalId)) {
       throw new LogicException(CommonErrorCode.JAVA_ERROR, "Невозможно удалить бакет животного: передан пустой id");

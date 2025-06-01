@@ -18,10 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,6 +52,22 @@ public class AttributeService {
     }
     return AttributeMapper.INSTANCE.toDto(findByName(name));
   }
+
+  /**
+   * Получение атрибутов по названию вида животного
+   *
+   * @param name название вида животного
+   * @return список атрибут
+   */
+  public List<AttributeDto> getByAnimalTypeName(String name) {
+    if (StringUtils.isBlank(name)) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно получить атрибут по названию: передано пустое название");
+    }
+    return AttributeMapper.INSTANCE.toDtoList(animalTypeAttributeValueRepository.findAllByAnimalTypeName((name))).stream()
+      .sorted(Comparator.comparing(AttributeDto::getPriority))
+      .collect(Collectors.toList());
+  }
+
 
   /**
    * Сохранение атрибута

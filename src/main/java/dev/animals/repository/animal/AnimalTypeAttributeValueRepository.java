@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface AnimalTypeAttributeValueRepository extends JpaRepository<AnimalTypeAttributeValueEntity, AnimalTypeAttributeValuePK> {
 
@@ -15,4 +17,6 @@ public interface AnimalTypeAttributeValueRepository extends JpaRepository<Animal
                 WHERE a.attribute.value = :attributeValue AND a.attribute.attributeName = :attributeName
     """)
   boolean existsByAttributeNameAndAttributeValue(String attributeValue, String attributeName);
+
+  List<AnimalTypeAttributeValueEntity> findAllByAnimalTypeName(String typeName);
 }

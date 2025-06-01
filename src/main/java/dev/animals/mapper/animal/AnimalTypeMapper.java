@@ -2,9 +2,9 @@ package dev.animals.mapper.animal;
 
 import dev.animals.entity.animal.AnimalTypeAttributeValueEntity;
 import dev.animals.entity.animal.AnimalTypeEntity;
+import dev.animals.entity.attribute.AttributeValueEntity;
 import dev.animals.entity.pk.AnimalTypeAttributeValuePK;
 import dev.animals.web.dto.animal.AnimalTypeDto;
-import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -29,11 +29,8 @@ public interface AnimalTypeMapper {
       target.setAttributes(source.getAttributes().stream()
         .map(AnimalTypeAttributeValueEntity::getAttribute)
         .collect(Collectors.groupingBy(
-          attribute -> StringUtils.capitalize(attribute.getAttributeName()),
-          Collectors.mapping(
-            attribute -> StringUtils.capitalize(attribute.getValue()),
-            Collectors.toSet()
-          )
+          AttributeValueEntity::getAttributeName,
+          Collectors.mapping(AttributeValueEntity::getValue, Collectors.toSet())
         ))
       );
     }

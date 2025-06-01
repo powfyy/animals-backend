@@ -32,6 +32,12 @@ public class AttributeController {
     return service.getByName(name);
   }
 
+  @GetMapping("/type/{typeName}")
+  @Operation(summary = "Получение атрибута по названию вида животного")
+  public List<AttributeDto> getByAnimalTypeName(@PathVariable String typeName) {
+    return service.getByAnimalTypeName(typeName);
+  }
+
   @PostMapping
   @Operation(summary = "Сохранение атрибута")
   public void save(@RequestBody @Valid AttributeDto dto) {

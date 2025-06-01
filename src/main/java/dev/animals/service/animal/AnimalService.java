@@ -14,6 +14,7 @@ import dev.animals.mapper.UserMapper;
 import dev.animals.mapper.animal.AnimalMapper;
 import dev.animals.repository.animal.AnimalRepository;
 import dev.animals.repository.specification.AnimalSpecification;
+import dev.animals.service.MinioService;
 import dev.animals.service.OrganizationService;
 import dev.animals.service.UserService;
 import dev.animals.web.dto.UserDto;
@@ -41,6 +42,7 @@ public class AnimalService {
   private final AnimalPhotoService photoService;
   private final OrganizationService organizationService;
   private final UserService userService;
+  private final MinioService minioService;
 
   /**
    * Получение животных
@@ -137,6 +139,7 @@ public class AnimalService {
       ))
       .toList());
     repository.save(animal);
+    minioService.createBucket(animal.getId().toString());
     return AnimalMapper.MAPPER.toDto(animal);
   }
 
@@ -182,7 +185,7 @@ public class AnimalService {
     if (Objects.isNull(dto.getStatus())) {
       return;
     }
-    if (!animal.getStatus().canTransitionTo(dto.getStatus())) {
+    if (!animal.getStatus().equals(dto.getStatus()) && !animal.getStatus().canTransitionTo(dto.getStatus())) {
       throw new LogicException(CommonErrorCode.JAVA_ERROR,
         String.format("Невозможно обновить статус животного: нельзя перевести животное в статус %s из %s",
           dto.getStatus(), animal.getStatus())
