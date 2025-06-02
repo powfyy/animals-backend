@@ -1,11 +1,13 @@
 package dev.animals.mapper.animal;
 
 import dev.animals.entity.OrganizationEntity;
+import dev.animals.entity.UserEntity;
 import dev.animals.entity.animal.AnimalAttributeValueEntity;
 import dev.animals.entity.animal.AnimalEntity;
 import dev.animals.entity.animal.AnimalPhotosEntity;
 import dev.animals.entity.animal.AnimalTypeEntity;
 import dev.animals.entity.pk.animal.AnimalAttributeValuePK;
+import dev.animals.mapper.UserMapper;
 import dev.animals.web.dto.animal.AnimalDto;
 import dev.animals.web.dto.animal.AnimalSaveDto;
 import org.mapstruct.AfterMapping;
@@ -18,11 +20,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Mapper
+@Mapper(uses = {UserMapper.class})
 public interface AnimalMapper {
 
   AnimalMapper MAPPER = Mappers.getMapper(AnimalMapper.class);
 
+  @Mapping(target = "userOwner", source = "user")
   @Mapping(source = "animalPhotos", target = "photoRefs")
   @Mapping(source = "organization.city", target = "city")
   @Mapping(source = "organization.name", target = "organizationName")
@@ -56,18 +59,23 @@ public interface AnimalMapper {
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "user", ignore = true)
   @Mapping(target = "animalPhotos", ignore = true)
-  @Mapping(target = "userSet", ignore = true)
+  @Mapping(target = "adoptionRequestUsers", ignore = true)
   AnimalEntity toEntity(AnimalSaveDto source, OrganizationEntity organization, AnimalTypeEntity type);
 
   @Mapping(target = "attributeValues", ignore = true)
   @Mapping(target = "organization", ignore = true)
-  @Mapping(target = "user", ignore = true)
-  @Mapping(target = "userSet", ignore = true)
+  @Mapping(target = "user", source = "user")
+  @Mapping(target = "adoptionRequestUsers", ignore = true)
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "type", ignore = true)
   @Mapping(target = "status", ignore = true)
   @Mapping(target = "animalPhotos", ignore = true)
-  void update(AnimalSaveDto source, @MappingTarget AnimalEntity target);
+  @Mapping(target = "name", source = "source.name")
+  @Mapping(target = "gender", source = "source.gender")
+  @Mapping(target = "birthDay", source = "source.birthDay")
+  @Mapping(target = "breed", source = "source.breed")
+  @Mapping(target = "description", source = "source.description")
+  void update(@MappingTarget AnimalEntity target, AnimalSaveDto source, UserEntity user);
 
   @AfterMapping
   default void updateAfter(@MappingTarget AnimalEntity target, AnimalSaveDto source) {
@@ -84,7 +92,7 @@ public interface AnimalMapper {
     }
   }
 
-  default String mapPetPhotosToString(AnimalPhotosEntity petPhotos) {
-    return petPhotos.getPhotoRef();
+  default String mapAnimalPhotosToString(AnimalPhotosEntity animalPhotos) {
+    return animalPhotos.getPhotoRef();
   }
 }

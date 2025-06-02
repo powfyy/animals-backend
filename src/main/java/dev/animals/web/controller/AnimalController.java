@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -30,6 +31,12 @@ public class AnimalController {
   public Page<AnimalDto> getAll(@RequestParam(required = false, defaultValue = "0") int page,
                                 @RequestParam(required = false, defaultValue = "15") int size) {
     return animalService.getAll(page, size);
+  }
+
+  @GetMapping("/organization")
+  @Operation(summary = "Получение животных организации")
+  public List<AnimalDto> getAllByOrg(Principal principal) {
+    return animalService.getAllByOrganizationUsername(principal.getName());
   }
 
   @GetMapping("/{id}")
@@ -74,6 +81,12 @@ public class AnimalController {
   @Operation(summary = "Удаление фотографии")
   public void deletePhoto(@PathVariable Long id, @RequestParam String photoRef) {
     animalService.removePhoto(id, photoRef);
+  }
+
+  @PostMapping("/adoption-request/{animalId}")
+  @Operation(summary = "Создание заявки на животное")
+  public void createRequest(@PathVariable Long animalId,  Principal principal) {
+    animalService.createAdoptionRequest(principal.getName(), animalId);
   }
 
   @GetMapping("/type")

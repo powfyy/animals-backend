@@ -58,7 +58,7 @@ public class MessageService {
     }
     ChatEntity chat = chatService.findById(dto.getChatId());
     MessageEntity newMessage = new MessageEntity(dto.getMessage(), chat);
-    if (Objects.isNull(dto.getUserUsername())) {
+    if (Objects.nonNull(dto.getUserUsername())) {
       newMessage.setUser(chat.getUser());
     } else {
       newMessage.setOrganization(chat.getOrganization());
@@ -81,7 +81,7 @@ public class MessageService {
     }
     AnimalEntity animal = animalService.findById(animalId);
     MessageEntity message = new MessageEntity(
-      "Заявка на животное с кличкой " + animal.getName() + ". Ссылка на питомца: http://localhost:4200/home/" + animal.getId(),
+      String.format("Заявка на животное с кличкой %s.", animal.getName()),
       chat
     );
     message.setUser(chat.getUser());

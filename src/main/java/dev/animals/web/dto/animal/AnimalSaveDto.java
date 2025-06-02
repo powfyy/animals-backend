@@ -10,6 +10,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -36,4 +37,6 @@ public class AnimalSaveDto implements AnimalValidator {
   @NotNull(message = "{animal.attributes.notnull.error}")
   @NotEmpty(message = "{animal.attributes.notempty.error}")
   private Map<String, String> attributes;
+  @NotNull(message = "{animal.adoptionRequestUserUsernames.notnull.error}")
+  private List<String> adoptionRequestUserUsernames;
 }

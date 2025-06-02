@@ -1,15 +1,16 @@
 package dev.animals.entity.attribute;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Data
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants

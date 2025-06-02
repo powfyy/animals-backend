@@ -122,6 +122,10 @@ public class AttributeService {
     if (StringUtils.isBlank(name)) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить атрибут: передано пустое название");
     }
+    if (animalTypeAttributeValueRepository.existsByAttributeAttributeName((name.toLowerCase()))) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR,
+        "Невозможно удалить атрибут: атрибут используется у вида животного");
+    }
     repository.deleteById(name.toLowerCase());
   }
 

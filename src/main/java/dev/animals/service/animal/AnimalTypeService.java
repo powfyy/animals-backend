@@ -6,6 +6,7 @@ import dev.animals.entity.pk.animal.AttributeValuePK;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
 import dev.animals.mapper.animal.AnimalTypeMapper;
+import dev.animals.repository.animal.AnimalRepository;
 import dev.animals.repository.animal.AnimalTypeRepository;
 import dev.animals.service.AttributeService;
 import dev.animals.web.dto.animal.AnimalTypeDto;
@@ -28,6 +29,7 @@ public class AnimalTypeService {
 
   private final AnimalTypeRepository repository;
   private final AttributeService attributeService;
+  private final AnimalRepository animalRepository;
 
   /**
    * Получение всех видов животных
@@ -114,6 +116,9 @@ public class AnimalTypeService {
     }
     if (!repository.existsById(name)) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить вид животного: не найден вид с названием: " + name);
+    }
+    if (animalRepository.existsByTypeName(name)) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить вид животного: существуют животные этим видом");
     }
     repository.deleteById(name);
   }

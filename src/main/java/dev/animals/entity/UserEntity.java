@@ -2,8 +2,9 @@ package dev.animals.entity;
 
 import dev.animals.entity.animal.AnimalEntity;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -11,8 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table (name= "users")
@@ -32,10 +33,7 @@ public class UserEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private AuthEntity auth;
 
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinTable(name = "user_animal",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "animal_id"))
+    @ManyToMany(mappedBy = "adoptionRequestUsers")
     private Set<AnimalEntity> animalSet = new HashSet<>();
 
     @OneToMany (mappedBy = "user",cascade = CascadeType.ALL)

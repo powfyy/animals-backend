@@ -19,4 +19,6 @@ public interface AnimalTypeAttributeValueRepository extends JpaRepository<Animal
   boolean existsByAttributeNameAndAttributeValue(String attributeValue, String attributeName);
 
   List<AnimalTypeAttributeValueEntity> findAllByAnimalTypeName(String typeName);
+
+  boolean existsByAttributeAttributeName(String attr0);
 }

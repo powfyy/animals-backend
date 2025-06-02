@@ -18,4 +18,6 @@ public interface AnimalRepository extends JpaRepository<AnimalEntity, Long>, Jpa
   List<AnimalEntity> findByOrganizationUsername(String username);
 
   Page<AnimalEntity> findAll(Specification<AnimalEntity> specification, Pageable pageable);
+
+  boolean existsByTypeName(String name);
 }

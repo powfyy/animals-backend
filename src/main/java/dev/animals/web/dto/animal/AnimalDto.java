@@ -1,6 +1,7 @@
 package dev.animals.web.dto.animal;
 
 import dev.animals.enums.GenderType;
+import dev.animals.web.dto.UserDto;
 import lombok.Data;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class AnimalDto {
   private String city;
   private String organizationName;
   private String organizationUsername;
+  private UserDto userOwner;
   private Map<String, String> attributes;
-
+  private List<UserDto> adoptionRequestUsers;
 }

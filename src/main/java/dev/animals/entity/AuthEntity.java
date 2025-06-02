@@ -1,13 +1,14 @@
 package dev.animals.entity;
 
 import dev.animals.enums.Role;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Data
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @Table(name = "auth")
 public class AuthEntity {

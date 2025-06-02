@@ -2,13 +2,14 @@ package dev.animals.entity.animal;
 
 import dev.animals.entity.attribute.AttributeValueEntity;
 import dev.animals.entity.pk.AnimalTypeAttributeValuePK;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Data
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @Table(name = "animal_type_attribute_values")
 public class AnimalTypeAttributeValueEntity {

@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -93,6 +94,14 @@ public class UserService {
     return userRepository.findByAuthUsername(username)
       .orElseThrow(() -> new LogicException(CommonErrorCode.COMMON_OBJECT_NOT_EXISTS,
         "Невозможно получить пользователя: не найден пользователь с логином: " + username));
+  }
+
+  public List<UserEntity> findAllByUsernames(List<String> usernames) {
+    if (Objects.isNull(usernames)) {
+      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно получить пользователя: передан пустой список логинов");
+    }
+    return userRepository.findAllByAuthUsernameIn(usernames);
+
   }
 
   /**

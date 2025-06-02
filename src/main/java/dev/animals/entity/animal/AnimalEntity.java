@@ -4,8 +4,9 @@ import dev.animals.entity.OrganizationEntity;
 import dev.animals.entity.UserEntity;
 import dev.animals.enums.AnimalStatus;
 import dev.animals.enums.GenderType;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -14,8 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @Table(name = "animals")
 public class AnimalEntity {
@@ -60,7 +61,10 @@ public class AnimalEntity {
   @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<AnimalAttributeValueEntity> attributeValues = new ArrayList<>();
 
-  @ManyToMany(mappedBy = "animalSet")
-  private Set<UserEntity> userSet = new HashSet<>();
+  @ManyToMany()
+  @JoinTable(name = "user_animal",
+    joinColumns = @JoinColumn(name = "animal_id"),
+    inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private Set<UserEntity> adoptionRequestUsers = new HashSet<>();
 
 }

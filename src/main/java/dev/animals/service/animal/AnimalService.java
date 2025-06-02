@@ -10,14 +10,12 @@ import dev.animals.entity.pk.animal.AnimalAttributeValuePK;
 import dev.animals.enums.AnimalStatus;
 import dev.animals.exception.LogicException;
 import dev.animals.exception.helper.CommonErrorCode;
-import dev.animals.mapper.UserMapper;
 import dev.animals.mapper.animal.AnimalMapper;
 import dev.animals.repository.animal.AnimalRepository;
 import dev.animals.repository.specification.AnimalSpecification;
 import dev.animals.service.MinioService;
 import dev.animals.service.OrganizationService;
 import dev.animals.service.UserService;
-import dev.animals.web.dto.UserDto;
 import dev.animals.web.dto.animal.AnimalDto;
 import dev.animals.web.dto.animal.AnimalFilterDto;
 import dev.animals.web.dto.animal.AnimalSaveDto;
@@ -30,7 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -177,7 +176,10 @@ public class AnimalService {
     if (!savedAnimal.getOrganization().getAuth().getUsername().equals(dto.getOrganizationUsername())) {
       savedAnimal.setOrganization(organizationService.findByUsername(dto.getOrganizationUsername()));
     }
-    AnimalMapper.MAPPER.update(dto, savedAnimal);
+    List<UserEntity> adoptionRequestUsers = userService.findAllByUsernames(dto.getAdoptionRequestUserUsernames());
+    savedAnimal.getAdoptionRequestUsers().clear();
+    savedAnimal.getAdoptionRequestUsers().addAll(adoptionRequestUsers);
+    AnimalMapper.MAPPER.update(savedAnimal, dto, Objects.nonNull(dto.getUserUsername()) ? userService.findByUsername(dto.getUserUsername()) : null);
     return AnimalMapper.MAPPER.toDto(repository.save(savedAnimal));
   }
 
@@ -193,7 +195,7 @@ public class AnimalService {
     }
     if (dto.getStatus().equals(AnimalStatus.ADOPTED)) {
       animal.setUser(userService.findByUsername(dto.getUserUsername()));
-      animal.getUserSet().clear();
+      animal.getAdoptionRequestUsers().clear();
     }
   }
 
@@ -242,64 +244,18 @@ public class AnimalService {
   }
 
   /**
-   * Удаление запроса пользователя
-   *
-   * @param animalId id животного
-   * @param username логин пользователя
-   */
-  @Transactional //todo пересмотреть метод. Возможно можно сделать через список пользователей у животного
-  public void deleteRequestUser(Long animalId, String username) {
-    if (Objects.isNull(animalId) || StringUtils.isBlank(username)) {
-      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно удалить пользовательский запрос: передан пустой параметр");
-    }
-    UserEntity user = userService.findByUsername(username);
-    user.getAnimalSet().remove(findById(animalId));
-    userService.save(user);
-  }
-
-  /**
-   * Проверка существует ли запрос на животное
-   *
-   * @param username логин пользователя
-   * @param animalId id животного
-   * @return //todo пересмотреть возвращаемое значение, возможно ориентироваться на статус ответа запроса
-   */
-  public Map<String, Boolean> checkRequest(String username, Long animalId) {
-    if (Objects.isNull(animalId) || StringUtils.isBlank(username)) {
-      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно проверить запросы на животных: передан пустой параметр");
-    }
-    UserEntity user = userService.findByUsername(username);
-    if (user.getAnimalSet().contains(findById(animalId))) {
-      return Collections.singletonMap("isThereRequest", true);
-    }
-    return Collections.singletonMap("isThereRequest", false);
-  }
-
-  /**
-   * Получение всех запросов на животное
-   *
-   * @param animalId id животного
-   * @return Список пользователей
-   */
-  public Set<UserDto> getUserRequests(Long animalId) {
-    if (Objects.isNull(animalId)) {
-      throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно получить пользовательский запрос: переданный id равен null");
-    }
-    return UserMapper.MAPPER.toDtoSet(findById(animalId).getUserSet());
-  }
-
-  /**
    * Создание запроса на животное
    *
    * @param username логин пользователя
    * @param animalId id животного
    */
-  public void requestForAnimal(String username, Long animalId) {
+  @Transactional
+  public void createAdoptionRequest(String username, Long animalId) {
     if (StringUtils.isBlank(username) || Objects.isNull(animalId)) {
       throw new LogicException(CommonErrorCode.VALIDATION_ERROR, "Невозможно создать запрос на животного: передан пустой параметр");
     }
-    UserEntity currentUser = userService.findByUsername(username);
-    currentUser.getAnimalSet().add(findById(animalId));
-    userService.save(currentUser);
+    AnimalEntity animal = findById(animalId);
+    animal.getAdoptionRequestUsers().add(userService.findByUsername(username));
+    repository.save(animal);
   }
 }
